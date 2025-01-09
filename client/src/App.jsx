@@ -16,11 +16,15 @@ import ShoppingListing from './pages/shopping-view/listing';
 import ShoppingCheckout from './pages/shopping-view/checkout';
 import ShoppingAccount from './pages/shopping-view/account';
 import CheckAuth from './components/common/check-auth';
+import UnauthPage from './pages/unauth-page';
 
 function App() {
 
   const isAuthenticated = false;
-  const user = null;
+  const user = {
+    name: "yael",
+    role: "user"
+  };
 
 
 
@@ -66,6 +70,7 @@ function App() {
         </Route>
 
         <Route path="*" element={<NotFound/>} />
+        <Route path="/unauth-page" element={<UnauthPage/ >}/>
 
 
 
