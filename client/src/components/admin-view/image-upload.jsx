@@ -4,13 +4,15 @@ import { Input } from "../ui/input";
 import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import  axios  from "axios";
+import { Skeleton } from "../ui/skeleton";
 
 function ProductImageUpload({
   imageFile,
   setImageFile,
+  imageLoadingState,
   uploadedImageUrl,
   setUploadedImageUrl,
-  setImageLoadingState
+  setImageLoadingState,
 }) {
   const inputRef = useRef(null);
 
@@ -38,16 +40,32 @@ function ProductImageUpload({
     }
   }
 
-  async function uploadImageToCloudinary(){
-    setImageLoadingState(true);
+  async function uploadImageToCloudinary() {
+    setImageLoadingState(true); // Inicia el estado de carga.
+  
     const data = new FormData();
-    data.append('my_file', imageFile)
-    const response = await axios.post('http://localhost:5000/api/admin/products/upload-image', data)  //server/routes/admin
-    console.log(response , 'response');
-    if(response?.data?.succes) 
-      setUploadedImageUrl(response.data.result.url);
+    data.append('my_file', imageFile);
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/admin/products/upload-image', data);
+  
+      // Verifica si la respuesta fue exitosa
+      if (response?.data?.success) {
+        // Actualiza la URL de la imagen y la termina el estado de carga
+        setUploadedImageUrl(response.data.result.url);  // Guarda la URL de la imagen subida
+        setImageLoadingState(false);  // Cambia el estado de carga a false
+      } else {
+        // Si no fue exitosa, maneja el error
+        setImageLoadingState(false);
+        console.error("Error: La carga de la imagen no fue exitosa.");
+      }
+    } catch (error) {
+      // Si ocurre un error durante la solicitud, también termina el estado de carga
       setImageLoadingState(false);
+      console.error("Error uploading image:", error);
+    }
   }
+  
 
 
 
@@ -82,7 +100,11 @@ function ProductImageUpload({
             <UploadCloudIcon className="w-10 text-muted-foreground mb-2" />
             <span>Drag & drop or click to upload image</span>
           </Label>
-        ) : (
+        ) : 
+          imageLoadingState ?(
+          <Skeleton className='h-10 bg-gray-100'/>
+        ): (
+          
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <FileIcon className="w-8 h-8 text-primary mr-2" />
@@ -99,7 +121,7 @@ function ProductImageUpload({
               <span className="sr-only">Remove File</span>
             </Button>
           </div>
-        )}
+          )}
       </div>
     </div>
   );
