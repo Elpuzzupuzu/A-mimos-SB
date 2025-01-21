@@ -9,7 +9,9 @@ cloudinary.config({
 
 const storage = new multer.memoryStorage();
 
-async function ImageUploadUtil(file){
+async function imageUploadUtil(file){
+    console.log("Subiendo imagen a Cloudinary:", file.slice(0, 100) + "..."); // Ver los primeros 100 caracteres
+
     const result = await cloudinary.uploader.upload(file, {
         resource_type : 'auto'
     })
@@ -23,4 +25,4 @@ async function ImageUploadUtil(file){
 
 const upload = multer({storage});
 
-module.exports = {upload ,ImageUploadUtil};
+module.exports = {upload ,imageUploadUtil};

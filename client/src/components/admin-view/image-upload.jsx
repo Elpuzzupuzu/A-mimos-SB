@@ -41,30 +41,32 @@ function ProductImageUpload({
   }
 
   async function uploadImageToCloudinary() {
-    setImageLoadingState(true); // Inicia el estado de carga.
+    setImageLoadingState(true);
   
     const data = new FormData();
-    data.append('my_file', imageFile);
+    data.append("my_file", imageFile);  
   
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/products/upload-image', data);
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/products/upload-image",
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
   
-      // Verifica si la respuesta fue exitosa
+      console.log("Respuesta del servidor:", response.data);  
+  
       if (response?.data?.success) {
-        // Actualiza la URL de la imagen y la termina el estado de carga
-        setUploadedImageUrl(response.data.result.url);  // Guarda la URL de la imagen subida
-        setImageLoadingState(false);  // Cambia el estado de carga a false
+        setUploadedImageUrl(response.data.result.url);
       } else {
-        // Si no fue exitosa, maneja el error
-        setImageLoadingState(false);
-        console.error("Error: La carga de la imagen no fue exitosa.");
+        console.error("Error: La carga de la imagen no fue exitosa. Respuesta:", response.data);
       }
     } catch (error) {
-      // Si ocurre un error durante la solicitud, también termina el estado de carga
+      console.error("Error uploading image:", error.response?.data || error.message);
+    } finally {
       setImageLoadingState(false);
-      console.error("Error uploading image:", error);
     }
   }
+  
   
 
 

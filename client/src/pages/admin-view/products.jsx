@@ -1,9 +1,12 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SheetContent, SheetHeader, SheetTitle, Sheet } from "@/components/ui/sheet";
 import CommonForm from "@/components/common/form";
 import { addProductFormElements } from "@/config";
 import ProductImageUpload from "@/components/admin-view/image-upload";
+import { useDispatch, useSelector } from "react-redux";
+import { addNewProduct, fetchAllProducts } from "@/store/admin/products-slice";
+import axios from "axios"; // Asegúrate de tener axios importado
 
 const initialFormData = {
   image: null,
@@ -20,12 +23,68 @@ function AdminProducts() {
   const [openCreateProductsDialog, setOpenCreateProductsDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
+  const { productList } = useSelector(state => state.adminProducts);
+  const dispatch = useDispatch();
 
-  function onSubmit() {}
+  // Función para subir la imagen a Cloudinary
+  async function uploadImageToCloudinary() {
+    setImageLoadingState(true);
 
-  console.log(formData, "formdata");
+    const data = new FormData();
+    data.append("my_file", imageFile);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/products/upload-image",
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("Respuesta del servidor:", response.data);
+
+      if (response?.data?.success) {
+        setUploadedImageUrl(response.data.result.url);
+      } else {
+        console.error("Error: La carga de la imagen no fue exitosa. Respuesta:", response.data);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error.response?.data || error.message);
+    } finally {
+      setImageLoadingState(false);
+    }
+  }
+
+  // Función para enviar el formulario
+  async function onSubmit(event) {
+    event.preventDefault();
+
+    // Espera que la imagen esté subida antes de continuar
+    if (!uploadedImageUrl) {
+      console.log("Esperando la carga de la imagen...");
+      return;
+    }
+
+    dispatch(addNewProduct({
+      ...formData,
+      image: uploadedImageUrl,
+    })).then((data) => {
+      console.log(data);
+    });
+  }
+
+  useEffect(() => {
+    dispatch(fetchAllProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (imageFile) {
+      uploadImageToCloudinary(); // Subir la imagen cuando se selecciona
+    }
+  }, [imageFile]);
+
+  console.log(productList, uploadedImageUrl, "productList");
 
   return (
     <Fragment>
@@ -46,7 +105,7 @@ function AdminProducts() {
             uploadedImageUrl={uploadedImageUrl}
             setUploadedImageUrl={setUploadedImageUrl}
             setImageLoadingState={setImageLoadingState}
-            imageLoadingState = {imageLoadingState}
+            imageLoadingState={imageLoadingState}
           />
           <div className="py-6">
             <CommonForm

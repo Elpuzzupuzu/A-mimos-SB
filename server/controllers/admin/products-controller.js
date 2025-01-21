@@ -1,140 +1,207 @@
-const { ImageUploadUtil } = require("../../helpers/cloudinary");
-const product = require("../../models/product");
+const { imageUploadUtil } = require("../../helpers/cloudinary");
+const Product = require("../../models/Product");
+
+// const handleImageUpload = async (req, res) => {
+//   try {
+//     const b64 = Buffer.from(req.file.buffer).toString("base64");
+//     const url = "data:" + req.file.mimetype + ";base64," + b64;
+//     const result = await imageUploadUtil(url);
+
+//     res.json({
+//       success: true,
+//       result,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({
+//       success: false,
+//       message: "Error occured",
+//     });
+//   }
+// };
 
 
 
-const handleImageUpload = async(req, res)=>{
-    try{
-        
-        const b64 = Buffer.from(req.file.buffer).toString('base64');
-        const url = "data:" + req.file.mimetype + ";base64," + b64;
-        const result = await ImageUploadUtil(url); // OJO CON ESTO NECESITA ESTAR CORRECTO PARA QUE SE INTERPRETE EN Cloudinary
-
-        res.json({
-            succes : true,
-            result
-        })
-
-    }catch(error){
-        console.log(error);
-        res.json({
-            success : false,
-            message : 'error ocurred'
-        })
+const handleImageUpload = async (req, res) => {
+    try {
+      console.log("📥 Recibiendo solicitud de subida...");
+  
+      if (!req.file) {
+        console.log("❌ No se recibió archivo en la solicitud.");
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+      }
+  
+    //   console.log(" Archivo recibido:", req.file);
+  
+      // Convertir buffer a base64
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      const url = `data:${req.file.mimetype};base64,${b64}`;
+  
+    //   console.log("⏳ Subiendo imagen a Cloudinary...");
+      const result = await imageUploadUtil(url);
+    //   console.log("✅ Imagen subida con éxito:", result);
+  
+      res.json({
+        success: true,
+        result,
+      });
+    } catch (error) {
+      console.error("❌ Error en subida de imagen:", error);
+  
+      res.status(500).json({
+        success: false,
+        message: "Error en el servidor",
+        error: error.message, // 🔥 Esto mostrará el error exacto
+      });
     }
-}
+  };
+  
+
+
+
+
+
+
+
 
 //add a new product
+const addProduct = async (req, res) => {
+  try {
+    const {
+      image,
+      title,
+      description,
+      category,
+      brand,
+      price,
+      salePrice,
+      totalStock,
+      averageReview,
+    } = req.body;
 
-const addProduct = async (req,res)=>{
-    try{
-        const {image,title,description,category,brand,price,salePrice, totalStock} = req.body;
-        const newlyCreatedProduct = new product({
-            image,title,description,category,brand,price,salePrice, totalStock
+    console.log(averageReview, "averageReview");
 
-        })
+    const newlyCreatedProduct = new Product({
+      image,
+      title,
+      description,
+      category,
+      brand,
+      price,
+      salePrice,
+      totalStock,
+      averageReview,
+    });
 
-        await newlyCreatedProduct.save();
-        res.status(201).json({
-            success : true,
-            data : newlyCreatedProduct
-        });
-
-
-    }catch(e){
-        res.status(500).json({
-            succes : false,
-            message: "Error occured"
-        });
-    }
-
-}
-
-
+    await newlyCreatedProduct.save();
+    res.status(201).json({
+      success: true,
+      data: newlyCreatedProduct,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Error occured",
+    });
+  }
+};
 
 //fetch all products
 
-const fetchAllProducts = async(req,res)=>{
-    try{ 
-        
-        const listOfProducts = await product.find({});
-        res.status.json({
-            success : true,
-            data: listOfProducts
-        })
-    }catch(e){
-        res.status(500).json({
-            succes : false,
-            message: "Error occured"
-        });
-    }
-}
+const fetchAllProducts = async (req, res) => {
+  try {
+    const listOfProducts = await Product.find({});
+    res.status(200).json({
+      success: true,
+      data: listOfProducts,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Error occured",
+    });
+  }
+};
 
 //edit a product
+const editProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      image,
+      title,
+      description,
+      category,
+      brand,
+      price,
+      salePrice,
+      totalStock,
+      averageReview,
+    } = req.body;
 
-const editProduct = async(req,res)=>{
-    try{
-        const{id} = req.params;
-        const {image,title,description,category,brand,price,salePrice, totalStock} = req.body;
+    let findProduct = await Product.findById(id);
+    if (!findProduct)
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
 
-        const findProduct = await product.findById(id);
-        if(!findProduct) return res.status(404).json({
-            success : false,
-            message : "product NOT found :("
-        });
+    findProduct.title = title || findProduct.title;
+    findProduct.description = description || findProduct.description;
+    findProduct.category = category || findProduct.category;
+    findProduct.brand = brand || findProduct.brand;
+    findProduct.price = price === "" ? 0 : price || findProduct.price;
+    findProduct.salePrice =
+      salePrice === "" ? 0 : salePrice || findProduct.salePrice;
+    findProduct.totalStock = totalStock || findProduct.totalStock;
+    findProduct.image = image || findProduct.image;
+    findProduct.averageReview = averageReview || findProduct.averageReview;
 
-        product.title = title || findProduct.title
-        product.title = description || findProduct.description
-        product.title = category || findProduct.category
-        product.title = brand || findProduct.brand
-        product.title = price || findProduct.price
-        product.title = salePrice || findProduct.salePrice
-        product.title = totalStock || findProduct.totalStock
-        product.title = image || findProduct.image
+    await findProduct.save();
+    res.status(200).json({
+      success: true,
+      data: findProduct,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Error occured",
+    });
+  }
+};
 
-        await findProduct.save();
-        res.status(200).json({
-            success : true,
-            data : findProduct
+//delete a product
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
 
-        })
+    if (!product)
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
 
+    res.status(200).json({
+      success: true,
+      message: "Product delete successfully",
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Error occured",
+    });
+  }
+};
 
-        product.title = title || findProduct.title
-
-
-
-
-    }catch(e){
-        res.status(500).json({
-            succes : false,
-            message: "Error occured"
-        });
-    }
-}
-
-//delete product
-
-const deleteProduct =async(req,res)=>{
-    try{
-        const {id} = req.params
-        const product = await product.findByIdAndUpdate(id);
-        if(!product) return res.status(404).json({
-            success : false,
-            message : "product NOT found :("
-        })
-        res.status(200).json({
-            succes : true, 
-            message : "Product deleted successfully :)"
-        })
-            
-
-    }catch(e){
-        res.status(500).json({
-            succes : false,
-            message: "Error occured"
-        });
-    }
-}
-
-module.exports ={handleImageUpload, addProduct,fetchAllProducts,editProduct,deleteProduct}
+module.exports = {
+  handleImageUpload,
+  addProduct,
+  fetchAllProducts,
+  editProduct,
+  deleteProduct,
+};
