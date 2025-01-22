@@ -3,7 +3,12 @@ import { Navigate, useLocation } from "react-router-dom";
 function CheckAuth({ isAuthenticated, user, children }) {
   const location = useLocation();
 
-  console.log(location.pathname,isAuthenticated)
+  console.log(location.pathname, isAuthenticated);
+
+  // Permite el acceso a la página de recuperación de contraseña sin estar autenticado
+  if (!isAuthenticated && location.pathname === "/auth/recover-password") {
+    return <>{children}</>;
+  }
 
   // Si el usuario no está autenticado, redirige a la página de login
   if (!isAuthenticated) {

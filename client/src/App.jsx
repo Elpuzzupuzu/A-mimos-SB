@@ -1,4 +1,3 @@
-
 import './App.css';
 import AdminLayout from './components/admin-view/layout';
 import AuthLayout from './components/auth/layout';
@@ -9,7 +8,8 @@ import AdminOrders from './pages/admin-view/order';
 import AdminProducts from './pages/admin-view/products';
 import AuthLogin from './pages/auth/login';
 import AutRegister from './pages/auth/register';
-import { Routes, Route } from 'react-router-dom'; // Importa Routes y Route
+import RecoverPassword from './pages/auth/RecoverPassword'; // Importa RecoverPassword
+import { Routes, Route } from 'react-router-dom'; 
 import NotFound from './pages/not-found';
 import ShoppingHome from './pages/shopping-view/home';
 import ShoppingListing from './pages/shopping-view/listing';
@@ -22,78 +22,59 @@ import { useEffect } from 'react';
 import { checkAuth } from './store/auth-slice';
 import { Skeleton } from "@/components/ui/skeleton"
 
-
 function App() {
 
-  
-    const {user,isAuthenticated, isLoading} = useSelector(state=> state.auth);
+    const { user, isAuthenticated, isLoading } = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
-    useEffect(()=>{
-      dispatch(checkAuth())
+    useEffect(() => {
+        dispatch(checkAuth())
+    }, [dispatch]);
 
-    },[dispatch]);
-
-    if(isLoading) return <Skeleton className="w-[800px] bg-black h-[600px] " />
-
+    if (isLoading) return <Skeleton className="w-[800px] bg-black h-[600px] " />
 
     console.log(isLoading, user)
 
+    return (
+        <div className="flex flex-col overflow-hidden bg-white">
+            <Routes>
+                <Route path="/auth" element={
+                    <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                        <AuthLayout />
+                    </CheckAuth>
+                }>
+                    <Route path="login" element={<AuthLogin />} />
+                    <Route path="register" element={<AutRegister />} />
+                    <Route path="recover-password" element={<RecoverPassword />} /> {/* Nueva ruta para RecoverPassword */}
+                </Route>
 
-  return (
-    <div className="flex flex-col overflow-hidden bg-white">
-     
-      <Routes>
-        <Route path="/auth" element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
-              <AuthLayout />
-            </CheckAuth>
-        }>
+                <Route path="/admin" element={
+                    <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                        <AdminLayout />
+                    </CheckAuth>
+                }>
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="features" element={<AdminFeatures />} />
+                </Route>
 
-          <Route path="login" element={<AuthLogin />} />
-          <Route path="register" element={<AutRegister />} />
-        </Route>
+                <Route path="/shop" element={
+                    <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                        <ShoppingLayout />
+                    </CheckAuth>
+                }>
+                    <Route path="home" element={<ShoppingHome />} />
+                    <Route path="listing" element={<ShoppingListing />} />
+                    <Route path="checkout" element={<ShoppingCheckout />} />
+                    <Route path="account" element={<ShoppingAccount />} />
+                </Route>
 
-        <Route path="/admin" element={
-          <CheckAuth isAuthenticated={isAuthenticated} user={user}>
-            <AdminLayout/>
-
-          </CheckAuth>
-        }>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="features" element={<AdminFeatures/>} />
-        </Route>
-
-        <Route path="/shop" element={
-          <CheckAuth isAuthenticated={isAuthenticated} user={user}> 
-            <ShoppingLayout/>
-          </CheckAuth>
-        }>
-        
-         <Route path="home" element={<ShoppingHome />}/> 
-         <Route path="listing" element={<ShoppingListing/>}/>
-         <Route path="checkout" element={<ShoppingCheckout/>}/>
-         <Route path="account" element={<ShoppingAccount/>}/>
-        
-        
-        
-        </Route>
-
-        <Route path="*" element={<NotFound/>} />
-        <Route path="/unauth-page" element={<UnauthPage/ >}/>
-
-
-
-
-
-
-      </Routes>
-    </div>
-  );
+                <Route path="*" element={<NotFound />} />
+                <Route path="/unauth-page" element={<UnauthPage />} />
+            </Routes>
+        </div>
+    );
 }
 
 export default App;
-
-

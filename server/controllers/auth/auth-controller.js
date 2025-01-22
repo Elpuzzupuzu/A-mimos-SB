@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/User')
+const nodemailer = require('nodemailer');
+
 
 
 //register}
@@ -132,5 +134,76 @@ const authMiddleware = async(req,res,next)=> {
 }
 
 
+// test 
 
-module.exports = {registerUser, loginUser, logoutUser, authMiddleware};
+
+
+// Función para recuperar la contraseña
+
+
+const recoverPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // Buscar al usuario por el correo proporcionado
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "No user found with this email address",
+            });
+        }
+
+        // Configurar el transporter de Nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'yael69242@gmail.com', // Tu correo
+                pass: 'erzw isln wtgc qqbk', // Contraseña de aplicación de Gmail
+            },
+        });
+
+        // Generar un token (puedes usarlo más adelante para restablecer la contraseña)
+        const TOKEN = jwt.sign({ id: user.id }, "jwt_secret_key", { expiresIn: "1d" });
+
+        // Configurar el correo a enviar
+        const mailOptions = {
+            from: 'yael69242@gmail.com', // Tu correo
+            to: email,
+            subject: 'Recuperación de Contraseña',
+            text: `Hola ${user.userName}, tu contraseña es: ${user.password}`, // Puedes cambiar este mensaje
+        };
+
+        // Enviar el correo
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error al enviar el correo',
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Se ha enviado un correo con la contraseña',
+            });
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            success: false,
+            message: 'Ha ocurrido un error',
+        });
+    }
+};
+
+module.exports = { recoverPassword };
+
+
+
+
+
+
+
+
+module.exports = {registerUser, loginUser, logoutUser, authMiddleware, recoverPassword};

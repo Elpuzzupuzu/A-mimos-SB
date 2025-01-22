@@ -6,68 +6,53 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
-
-
-
-const initialState={
-    
+const initialState = {
     email: '',
-    passsword: ''
+    password: ''  // Corrige la propiedad "password" (anteriormente "passsword")
 }
 
-
-function AuthLogin(){
-
-
-    const [formData, setFormData] = useState(initialState)
+function AuthLogin() {
+    const [formData, setFormData] = useState(initialState);
     const dispatch = useDispatch();
-    const {toast} = useToast();
+    const { toast } = useToast();
 
-    function onSubmit(event){
+    function onSubmit(event) {
         event.preventDefault();
 
-        dispatch(loginUser(formData)).then(data=>{
-            if(data?.payload?.success){
+        dispatch(loginUser(formData)).then(data => {
+            if (data?.payload?.success) {
                 toast({
-                    title : data?.payload?.message
-                })
-
-            } else{
+                    title: data?.payload?.message
+                });
+            } else {
                 toast({
-                    title : data?.payload?.message,
-                    variant : 'destructive'
-                })
-
+                    title: data?.payload?.message,
+                    variant: 'destructive'
+                });
             }
         });
     }
 
-
-
-
-
-    return(
+    return (
         <div className="mx-auto w-full max-w-md space-y-6">
             <div className="text-center">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in to your account</h1>
-                <p className="mt-2 ">Dont havent an account
-    <Link className="font-medium ml-2 text-primary hover:underline" to={'/auth/register'}>Register</Link>
+                <p className="mt-2">Don't have an account?
+                    <Link className="font-medium ml-2 text-primary hover:underline" to={'/auth/register'}>Register</Link>
                 </p>
-
+                <p className="mt-2">
+                    <Link className="font-medium ml-2 text-primary hover:underline" to={'/auth/recover-password'}>Forgot password?</Link>
+                </p>
             </div>
             <CommonForm
-            formControls={loginFormControls}
-            buttonText={'Sign In'}
-            formData={formData}
-            setFormData={setFormData}
-            onSubmit={onSubmit}
-
-    
-            
+                formControls={loginFormControls}
+                buttonText={'Sign In'}
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={onSubmit}
             />
-
         </div>
-    )
+    );
 }
 
 export default AuthLogin;
