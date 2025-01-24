@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addNewProduct, fetchAllProducts } from "@/store/admin/products-slice";
 import axios from "axios"; // Asegúrate de tener axios importado
 import { useToast } from "@/hooks/use-toast";
-
+import AdminProductTile from "@/components/admin-view/product-tile";
 const initialFormData = {
   image: null,
   title: '',
@@ -78,7 +78,7 @@ function AdminProducts() {
         dispatch(fetchAllProducts())
         setOpenCreateProductsDialog(false);
         setImageFile(null);
-        setFormData(initialFormData)  /// test
+        setFormData(initialFormData)                                                  /// test
         toast({
           title : 'product add successfully'
         })
@@ -106,7 +106,17 @@ function AdminProducts() {
         <Button onClick={() => setOpenCreateProductsDialog(true)}>Add new product</Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {
+          productList && productList.length > 0 ?
+          productList.map((productItem)=> (
+            <AdminProductTile product={productItem}/>
+
+          ))
+          : null
+          
+        }
+      </div>
 
       <Sheet open={openCreateProductsDialog} onOpenChange={setOpenCreateProductsDialog}>
         <SheetContent side="right" className="overflow-auto">
