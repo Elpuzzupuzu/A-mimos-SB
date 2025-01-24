@@ -7,6 +7,7 @@ import ProductImageUpload from "@/components/admin-view/image-upload";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewProduct, fetchAllProducts } from "@/store/admin/products-slice";
 import axios from "axios"; // Asegúrate de tener axios importado
+import { useToast } from "@/hooks/use-toast";
 
 const initialFormData = {
   image: null,
@@ -27,6 +28,8 @@ function AdminProducts() {
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const { productList } = useSelector(state => state.adminProducts);
   const dispatch = useDispatch();
+  const{toast} = useToast()
+
 
   // Función para subir la imagen a Cloudinary
   async function uploadImageToCloudinary() {
@@ -71,6 +74,17 @@ function AdminProducts() {
       image: uploadedImageUrl,
     })).then((data) => {
       console.log(data);
+      if(data?.payload?.success){
+        dispatch(fetchAllProducts())
+        setOpenCreateProductsDialog(false);
+        setImageFile(null);
+        setFormData(initialFormData)  /// test
+        toast({
+          title : 'product add successfully'
+        })
+        console.log(productList, uploadedImageUrl, "productList");
+
+      }
     });
   }
 
