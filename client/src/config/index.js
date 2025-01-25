@@ -238,6 +238,8 @@ export const addProductFormElements = [
     },
   ];
 
+  
+
 //parte del admin
 
 
