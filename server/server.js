@@ -4,7 +4,7 @@ const cookieParser = require ('cookie-parser');
 const cors = require ('cors');
 const authRouter = require('./routes/auth/auth-routes')
 const adminProductsRouter = require('./routes/admin/products-routes')
-
+const shopProductsRouter = require ('./routes/shop/products-routes')
 
 mongoose.connect('mongodb+srv://yaelop117:f7q2YBjbwchcvhMD@cluster0.2pgv9.mongodb.net/').then(()=>console.log('MongoDB Connected')).catch(error =>console.log('error al conectar a la base de datos'))
 
@@ -31,6 +31,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use('/api/auth',authRouter)
 app.use("/api/admin/products",adminProductsRouter)
+app.use("/api/shop/products", shopProductsRouter)
 
 
 

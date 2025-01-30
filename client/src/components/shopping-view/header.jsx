@@ -1,14 +1,15 @@
-import { Link } from "react-router-dom";
-import { Cat, House } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Cat, House, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet"; // Importa `Sheet`
 import { Button } from "../ui/button"; // Importa `Button`
 import { Menu } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { shoppingViewHeaderMenuItems } from "@/config";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { ShoppingCart } from "lucide-react";
 import { UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
+import { logoutUser } from "@/store/auth-slice";
 
 
 function MenuItems (){
@@ -24,6 +25,13 @@ function MenuItems (){
 
 function HeaderRightContent (){
     const {user} = useSelector((state)=> state.auth);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    function handleLogout(){
+        dispatch(logoutUser())
+
+    }
 
     return <div className=" flex lg:items-center lg:flex-row flex-col gap-4 px-4">
         <Button className=""   variant= "outline" size = "icon">
@@ -42,9 +50,16 @@ function HeaderRightContent (){
             <DropdownMenuContent side="right" className="w-56 justify-between px-10">
                 <DropdownMenuLabel>Logged in as {user?.userName} </DropdownMenuLabel>
                 <DropdownMenuSeparator/>
-                <DropdownMenuItem>
-                <UserRound className ="mr-2 h-4 w-4 "/>
+                <DropdownMenuItem className="cursor-pointer"  onClick={()=>navigate('/shop/account')}>
+                    <UserRound className ="mr-2 h-4 w-4 "/>
+                    Account
                 </DropdownMenuItem>
+                <DropdownMenuSeparator/>
+                <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4"/>
+                    LogOut
+                </DropdownMenuItem>
+
 
             </DropdownMenuContent>
         </DropdownMenu>
@@ -74,17 +89,18 @@ function ShoppingHeader(){
                 </SheetTrigger>
                 <SheetContent side= "left" className ="w-full max-w-xs">
                     <MenuItems/>
+                    <HeaderRightContent/>
                 </SheetContent>
             </Sheet>
             <div className="hidden lg:block ml:6">
                 <MenuItems/>
 
             </div>
-            {
-                isAuthenticated? <div>
+            
+                <div className="hidden lg:block">
                     <HeaderRightContent/>
-                </div> : null
-            }
+                </div> 
+            
         </div>
        </header>
     );
