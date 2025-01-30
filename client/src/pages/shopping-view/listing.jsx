@@ -35,7 +35,7 @@ function ShoppingListing(){
             <div className="p-4 border-b gap-3 flex items-center justify-between">
                 <h2 className="text-lg font-extrabold">All products</h2>
                 <div className="flex items-center gap-3 ">
-                    <span className="text-muted-foreground">10 products</span>
+                    <span className="text-muted-foreground">{productList.data.length}</span>
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm" className="flex items-center gap-1">
@@ -52,7 +52,7 @@ function ShoppingListing(){
                 </DropdownMenu>
                 </div>
             </div>
-            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-4">   
             {
     productList?.data && productList.data.length > 0 ?
     productList.data.map(productItem => <ShoppingProductTile key={productItem._id} product={productItem}/>) : null
@@ -67,5 +67,5 @@ function ShoppingListing(){
         
     
 }
-
+//6:06 con esto se mueve el grid de los productos linea 55 lg:grid-cols-4
 export default ShoppingListing;
