@@ -54,6 +54,8 @@ export const loginFormControls = [
 
 ];
 
+
+// este es el form para añadir productos 
 export const addProductFormElements = [
     {
       label: "Title",

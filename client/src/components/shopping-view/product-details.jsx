@@ -1,5 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Star } from "lucide-react";
@@ -34,6 +36,17 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                                 {productDetails?.description || "Sin descripción"}
                             </p>
                         </div>
+                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star 
+                                                key={i} 
+                                                className="w-5 h-5 fill-primary text-primary"
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="text-muted-foreground">(4.5)</span>
+                            </div>
 
                         {/* Price section with improved layout */}
                         <div className="flex items-baseline gap-4">
@@ -52,12 +65,16 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                             Add to Cart
                         </Button>
                     </div>
+                    <div className="mt-6 flex-gap-2">
+                        <Input placeholder="write a review"/>
+                        <Button>summit</Button>
+                    </div>
                 </div>
 
                 {/* Reviews section with improved styling */}
                 <div className="mt-8">
                     <Separator className="mb-6" />
-                    <div className="space-y-6">
+                    <div className="flex  space-y-6">
                         <h2 className="text-xl font-bold">Reviews</h2>
                         <div className="space-y-6 max-h-[300px] overflow-y-auto pr-4">
                             <div className="flex gap-4 items-start bg-gray-50 p-4 rounded-lg">
@@ -82,6 +99,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                                         This is an awesome plushie
                                     </p>
                                 </div>
+                                // aqui tengo que hacer un fix en el ccs
                             </div>
                         </div>
                     </div>

@@ -16,7 +16,7 @@ function MenuItems (){
     return <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-4 lg:flex-row">
         {
             shoppingViewHeaderMenuItems.map((menuItem) => 
-            <Link className="text-sm font-medium" key={menuItem.id} to={menuItem.path}>{menuItem.label}</Link>)
+            <Link className="text-lg font-medium text-pink-500 hover:text-purple-600" key={menuItem.id} to={menuItem.path}>{menuItem.label}</Link>)
             
         }
 
@@ -77,8 +77,8 @@ function ShoppingHeader(){
        <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
             <Link to={"/shop/home"} className="flex items-center gap-4 px-4">
-                <Cat className="h-6 w-6 gap-2" />
-                <span className="font-bold">MimitoShop</span>
+                <Cat className="text-purple-800 h-6 w-6 gap-2" />
+                <span className="font-bold text-pink-400">MimitoShop</span>
             </Link>
             <Sheet>
                 <SheetTrigger asChild>
