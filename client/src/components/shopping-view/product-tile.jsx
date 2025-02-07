@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ShoppingProductTile({ product, handleGetProductDetails }) {
+function ShoppingProductTile({ product, handleGetProductDetails, handleAddtoCart }) {
   return (
     <div className="w-60 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
       <div 
@@ -41,7 +41,7 @@ function ShoppingProductTile({ product, handleGetProductDetails }) {
             )}
           </div>
 
-          <button className="w-full py-1.5 px-3 text-sm bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-md transition-colors duration-200">
+          <button onClick={()=>handleAddtoCart(product?._id)} className="w-full py-1.5 px-3 text-sm bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-md transition-colors duration-200">
             Add to Cart
           </button>
         </div>

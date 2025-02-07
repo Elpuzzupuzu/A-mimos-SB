@@ -4,6 +4,7 @@ import ShoppingProductTile from "@/components/shopping-view/product-tile";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { sortOptions } from "@/config";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 
 import { fetchAllFilteredProducts, fetchProductDetails } from "@/store/shop/products-slice";
 
@@ -35,6 +36,8 @@ function ShoppingListing(){
 
     const dispatch = useDispatch();
     const {productList, productDetails} = useSelector(state => state.shopProducts)
+    const{user} = useSelector(state =>state.auth)
+    // const {cartItems} =useSelector(state => state.shopCart)
     const [filters, setFilters] = useState({});
     const [sort, setSort] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
@@ -46,7 +49,7 @@ function ShoppingListing(){
     },[dispatch, sort , filters])
 
 
-    console.log(productDetails, "pruebas product details");
+    // console.log(productDetails, "pruebas product details");
     
    // funcion para ordenar
 
@@ -83,11 +86,33 @@ function ShoppingListing(){
 
 
    function handleGetProductDetails(getCurrentProductId){
-    console.log(getCurrentProductId, "current id");
+    // console.log(getCurrentProductId, "current id");
     dispatch(fetchProductDetails(getCurrentProductId))
 
 
    }
+
+   function handleAddtoCart(getCurrentProductId){
+    console.log(getCurrentProductId , "getcurrentproductID");
+    dispatch(
+        addToCart({
+            userId : user?.id, 
+            productId: getCurrentProductId , 
+            quantity:1})
+        ).then((data) => {
+            if(data?.payload?.success){
+                dispatch(fetchCartItems(user?.id));
+
+            }
+        })
+    
+
+   }
+
+
+
+
+
 
    useEffect(()=>{
     if(productDetails !== null) setOpenDetailsDialog(true) 
@@ -121,7 +146,8 @@ function ShoppingListing(){
 
    },[filters])
 
-
+//    console.log(cartItems, "cartItems");
+   
 
     return <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
         <ProductFilter filters={filters} handleFilter={handleFilter}/>
@@ -149,7 +175,7 @@ function ShoppingListing(){
             <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-4">   
             {
     productList?.data && productList.data.length > 0 ?
-    productList.data.map(productItem => <ShoppingProductTile handleGetProductDetails={handleGetProductDetails} key={productItem._id} product={productItem}/>) : null
+    productList.data.map(productItem => <ShoppingProductTile handleAddtoCart={handleAddtoCart} handleGetProductDetails={handleGetProductDetails} key={productItem._id} product={productItem}/>) : null
 }
 
             
@@ -162,5 +188,4 @@ function ShoppingListing(){
         
     
 }
-//6:06 con esto se mueve el grid de los productos linea 55 lg:grid-cols-4
 export default ShoppingListing;

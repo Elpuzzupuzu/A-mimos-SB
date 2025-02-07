@@ -10,6 +10,9 @@ import { ShoppingCart } from "lucide-react";
 import { UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { logoutUser } from "@/store/auth-slice";
+import UserCartWrapper from "./cart-wrapper";
+import { useEffect, useState } from "react";
+import { fetchCartItems } from "@/store/shop/cart-slice";
 
 
 function MenuItems (){
@@ -25,6 +28,8 @@ function MenuItems (){
 
 function HeaderRightContent (){
     const {user} = useSelector((state)=> state.auth);
+    const {cartItems} =useSelector(state => state.shopCart)
+    const [openCartSheet , setOpenCartSheet] = useState(false)
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -33,11 +38,33 @@ function HeaderRightContent (){
 
     }
 
+    useEffect(() => {
+        if (user?.id) {
+            dispatch(fetchCartItems(user.id));
+        }
+    }, [dispatch, user?.id]);
+    
+
+    console.log("Estado del carrito en Redux:", cartItems);
+
+    // Verifica el estado de cartItems después de la carga
+        useEffect(() => {
+            console.log("Estado de cartItems en el useEffect:", cartItems);
+        }, [cartItems]);
+            
+
+
     return <div className=" flex lg:items-center lg:flex-row flex-col gap-4 px-4">
-        <Button className=""   variant= "outline" size = "icon">
+        <Sheet open={openCartSheet} onOpenChange={()=> setOpenCartSheet(false)}>
+        <Button onClick={()=> setOpenCartSheet(true)} className=""   variant= "outline" size = "icon">
         <ShoppingCart  className="w-6 h-6 " />
         <span className="sr-only">User Cart</span>
         </Button>
+        <UserCartWrapper 
+                cartItems={cartItems && cartItems.items && cartItems.items.length > 0 ? cartItems.items : []} 
+            /> 
+        </Sheet>
+      
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Avatar className="bg-pink-600 rounded-full">
@@ -71,6 +98,8 @@ function ShoppingHeader(){
 
     const{isAuthenticated} = useSelector(state=>state.auth)
     // console.log(user, "userShopping")
+    // console.log(cartItems, "CART ITEMS");
+    
 
 
     return(
