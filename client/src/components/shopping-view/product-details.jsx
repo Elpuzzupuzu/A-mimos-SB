@@ -5,12 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Star } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
+import { useToast } from "@/hooks/use-toast";
+import { setProductDetails } from "@/store/shop/products-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
     if (!productDetails) return null;
 
+    const dispatch = useDispatch()
+    const {user} = useSelector( (state) => state.auth);
+    const {toast} = useToast()
+    
+      function handleAddtoCart(getCurrentProductId){
+        console.log(getCurrentProductId , "getcurrentproductID");
+        dispatch(
+            addToCart({
+                userId : user?.id, 
+                productId: getCurrentProductId , 
+                quantity:1})
+            ).then((data) => {
+                if(data?.payload?.success){
+                    dispatch(fetchCartItems(user?.id));
+                    toast({
+                        title : 'Product is added to cart',
+                    })
+    
+                }
+            })
+        
+    
+       }
+
+       function handelDialogClose (){
+        setOpen(false)
+        dispatch(setProductDetails());
+
+       }
+
+
+
+
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handelDialogClose}>
             <DialogContent className="p-4 sm:p-6 lg:p-8 max-w-[95vw] sm:max-w-[700px] lg:max-w-[900px] overflow-y-auto max-h-[90vh]">
                 <DialogTitle className="text-center text-2xl font-bold sm:text-3xl mb-6">
                     {productDetails?.title || "Detalles del producto"}
@@ -61,7 +98,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                         </div>
 
                         {/* Add to cart button with hover effect */}
-                        <Button className="w-full py-6 text-lg font-semibold hover:opacity-90 transition-opacity">
+                        <Button onClick={()=>handleAddtoCart(productDetails?._id)} className="w-full py-6 text-lg font-semibold hover:opacity-90 transition-opacity">
                             Add to Cart
                         </Button>
                     </div>
@@ -106,6 +143,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                 </div>
             </DialogContent>
         </Dialog>
+        
     );
 }
 

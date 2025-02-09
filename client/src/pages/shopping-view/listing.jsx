@@ -4,7 +4,9 @@ import ShoppingProductTile from "@/components/shopping-view/product-tile";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { sortOptions } from "@/config";
+import { useToast } from "@/hooks/use-toast";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
+
 
 import { fetchAllFilteredProducts, fetchProductDetails } from "@/store/shop/products-slice";
 
@@ -12,6 +14,7 @@ import { ArrowUpDownIcon, CloudCog } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSearchParams, useSearchParams } from "react-router-dom";
+
 
 
 
@@ -42,6 +45,7 @@ function ShoppingListing(){
     const [sort, setSort] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
     const [openDetailsDialog, setOpenDetailsDialog] = useState(false)
+    const {toast} = useToast()
 
     useEffect(()=>{
         if(filters !==null && sort !== null )
@@ -102,6 +106,9 @@ function ShoppingListing(){
         ).then((data) => {
             if(data?.payload?.success){
                 dispatch(fetchCartItems(user?.id));
+                toast({
+                    title : 'Product is added to cart',
+                })
 
             }
         })
@@ -118,14 +125,6 @@ function ShoppingListing(){
     if(productDetails !== null) setOpenDetailsDialog(true) 
 
    },[productDetails])
-
-
-
-
-
-
-
-
 
     // console.log(filters,setSearchParams, "filters");
 
@@ -182,7 +181,11 @@ function ShoppingListing(){
             </div>
            
         </div>
-        <ProductDetailsDialog open={openDetailsDialog} setOpen={setOpenDetailsDialog} productDetails={productDetails}/>
+        <ProductDetailsDialog 
+        open={openDetailsDialog} 
+        setOpen={setOpenDetailsDialog} 
+        productDetails={productDetails}
+        />
 
     </div>
         

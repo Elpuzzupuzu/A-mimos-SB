@@ -13,13 +13,33 @@ import { logoutUser } from "@/store/auth-slice";
 import UserCartWrapper from "./cart-wrapper";
 import { useEffect, useState } from "react";
 import { fetchCartItems } from "@/store/shop/cart-slice";
+import { Label } from "../ui/label";
 
 
 function MenuItems (){
+
+    const navigate = useNavigate()
+
+    function handleNavigate(getCurrentMenuItem){
+        sessionStorage.removeItem('filters');
+        const currentFilter = getCurrentMenuItem.id !== 'home'? 
+        {
+            category : [getCurrentMenuItem.id]
+        } : null
+        sessionStorage.setItem('filters',JSON.stringify(currentFilter))
+        navigate(getCurrentMenuItem.path)
+    }
+
+
     return <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-4 lg:flex-row">
         {
             shoppingViewHeaderMenuItems.map((menuItem) => 
-            <Link className="text-lg font-medium text-pink-500 hover:text-purple-600" key={menuItem.id} to={menuItem.path}>{menuItem.label}</Link>)
+
+            <Label onClick={()=>handleNavigate(menuItem)} className="text-lg font-medium cursor-pointer text-pink-500 hover:text-purple-600" 
+            key={menuItem.id} 
+            >
+            {menuItem.label}
+            </Label>)
             
         }
 
@@ -45,11 +65,11 @@ function HeaderRightContent (){
     }, [dispatch, user?.id]);
     
 
-    console.log("Estado del carrito en Redux:", cartItems);
+    // console.log("Estado del carrito en Redux:", cartItems);
 
     // Verifica el estado de cartItems después de la carga
         useEffect(() => {
-            console.log("Estado de cartItems en el useEffect:", cartItems);
+            // console.log("Estado de cartItems en el useEffect:", cartItems);
         }, [cartItems]);
             
 

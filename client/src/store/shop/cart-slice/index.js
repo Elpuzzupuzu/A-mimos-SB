@@ -31,6 +31,30 @@ export const updateCartQuantity = createAsyncThunk('cart/updateCartQuantity', as
     return response.data;
 });
 
+// export const updateCartQuantity = createAsyncThunk(
+//     'cart/updateCartQuantity',
+//     async ({ userId, productId, quantity }, { rejectWithValue }) => {
+//         try {
+//             if (!userId || !productId || quantity === undefined) {
+//                 throw new Error("Faltan datos requeridos");
+//             }
+
+//             const response = await axios.put(
+//                 'http://localhost:5000/api/shop/cart/update-cart',
+//                 { userId, productId, quantity },
+//                 { headers: { 'Content-Type': 'application/json' } } // Asegurar que el backend reciba JSON
+//             );
+
+//             return response.data;
+//         } catch (error) {
+//             console.error("Error al actualizar el carrito:", error.response?.data || error.message);
+
+//             return rejectWithValue(error.response?.data || { success: false, message: "Error en la actualización del carrito" });
+//         }
+//     }
+// );
+
+
 const shoppingCartSlice = createSlice({
     name: 'shoppingCart',
     initialState,
@@ -65,7 +89,7 @@ const shoppingCartSlice = createSlice({
             })
             .addCase(updateCartQuantity.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.cartItems = action.payload;
+                state.cartItems = action.payload.data;
             }).
             addCase(updateCartQuantity.rejected, (state, action) => {
                 state.isLoading = false;
