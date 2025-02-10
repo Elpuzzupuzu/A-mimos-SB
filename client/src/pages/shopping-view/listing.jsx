@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 import { sortOptions } from "@/config";
 import { useToast } from "@/hooks/use-toast";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
+import mimos from "../../assets/mimos3.jpg"
+
 
 
 import { fetchAllFilteredProducts, fetchProductDetails } from "@/store/shop/products-slice";
@@ -174,7 +176,7 @@ function ShoppingListing(){
             <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-4">   
             {
     productList?.data && productList.data.length > 0 ?
-    productList.data.map(productItem => <ShoppingProductTile handleAddtoCart={handleAddtoCart} handleGetProductDetails={handleGetProductDetails} key={productItem._id} product={productItem}/>) : null
+    productList.data.map(productItem => <ShoppingProductTile handleAddtoCart={handleAddtoCart} handleGetProductDetails={handleGetProductDetails} key={productItem._id} product={productItem}/>) : <img className="w-full" src={mimos}/>
 }
 
             
