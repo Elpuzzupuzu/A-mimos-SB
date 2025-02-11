@@ -1,28 +1,57 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// const initialState = {
+//     isLoading: false,
+//     productList: [],
+//     producDetails : null
+// };
+
+// export const fetchAllFilteredProducts = createAsyncThunk(
+//     "/products/fetchAllProducts",
+//     async ({filterParams, sortParams}) => {
+// s
+//         const query = new URLSearchParams({
+//             ...filterParams,
+//             sortBy : sortParams
+
+//         })
+
+
+
+//         const result = await axios.get(`http://localhost:5000/api/shop/products/get?${query}`);
+//         return result?.data;
+//     }
+// );
 const initialState = {
     isLoading: false,
     productList: [],
-    producDetails : null
+    productDetails: null,
+    currentPage: 1,
+    totalPages: 1,
+    totalProducts: 0
 };
+
+
 
 export const fetchAllFilteredProducts = createAsyncThunk(
     "/products/fetchAllProducts",
-    async ({filterParams, sortParams}) => {
-
+    async ({ filterParams, sortParams, page = 1, limit = 10 }) => {
         const query = new URLSearchParams({
             ...filterParams,
-            sortBy : sortParams
-
-        })
-
-
+            sortBy: sortParams,
+            page,
+            limit
+        });
 
         const result = await axios.get(`http://localhost:5000/api/shop/products/get?${query}`);
         return result?.data;
     }
 );
+
+
+
+
 
 
 export const fetchProductDetails = createAsyncThunk(
@@ -53,7 +82,17 @@ const shoppingProductSlice = createSlice({
                 console.log(action.payload , "action payload index");
                 state.isLoading = false;
                 state.productList = action.payload;
+                
             })
+            // .addCase(fetchAllFilteredProducts.fulfilled, (state, action) => {
+            //     console.log(action.payload, "action payload index");
+            //     state.isLoading = false;
+            //     state.productList = action.payload;
+            //     state.currentPage = action.payload.currentPage;
+            //     state.totalPages = action.payload.totalPages;
+            //     state.totalProducts = action.payload.totalProducts;
+            // })
+            
             .addCase(fetchAllFilteredProducts.rejected, (state, action) => {
                 console.log(action.payload);
                 state.isLoading = false;

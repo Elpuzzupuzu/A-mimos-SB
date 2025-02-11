@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { addressFormControls } from "@/config";
 import { Item } from "@radix-ui/react-dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewAddress, deleteAddress, fetchAllAddresses } from "@/store/shop/address-slice";
+import { addNewAddress, deleteAddress, editaAddress, fetchAllAddresses } from "@/store/shop/address-slice";
 import AddressCard from "@/pages/shopping-view/address-card";
+import { useToast } from "@/hooks/use-toast";
 
 const initialAddressFormData = {
     address : '',
@@ -19,15 +20,40 @@ const initialAddressFormData = {
 function Address (){
 
     const[formData , setFormData] = useState(initialAddressFormData)
+    const[currentEditedId, setCurrentEditedId] = useState(null); 
     const dispatch = useDispatch();
     const {user} = useSelector(state => state.auth);
     const {addressList} = useSelector(state => state.shopAddress);
+    const {toast} = useToast();
 
 
 
 
     function handleManageAddress(event){
         event.preventDefault();
+
+        if(addressList.length >= 3 && currentEditedId ===null){
+            setFormData(initialAddressFormData)
+            toast({
+                title : 'You can add max 3 address',
+                variant : 'destructive'
+            })
+            return;
+        }
+
+        currentEditedId !== null ? dispatch(editaAddress({
+            userId : user?.id, addressId : currentEditedId , formData
+        })).then((data)=>{
+            if(data?.payload?.success){
+                dispatch(fetchAllAddresses(user?.id))
+                setCurrentEditedId(null)
+                setFormData(initialAddressFormData)
+                toast({
+                    title : 'address updated successfully'
+                })
+            }
+        }) : 
+
         dispatch(addNewAddress({
             ...formData,
             userId : user?.id
@@ -36,10 +62,25 @@ function Address (){
             if(data?.payload?.success){
                 dispatch(fetchAllAddresses(user?.id))
                 setFormData(initialAddressFormData)
+                toast({
+                    title : 'address added successfully'
+                })
             }
             
         })
+    }
 
+
+    function handleEditAddress(getCurrentAddress){
+        setCurrentEditedId(getCurrentAddress?._id) 
+        setFormData({
+            ...formData,
+            address : getCurrentAddress?.address,
+            city : getCurrentAddress?.city,
+            phone : getCurrentAddress?.phone,
+            pincode : getCurrentAddress?.pincode,
+            notes : getCurrentAddress?.notes
+        })
 
     }
 
@@ -47,23 +88,28 @@ function Address (){
     function handleDeleteAddress(getCurrentAddress) {
         dispatch(deleteAddress({ userId: user?.id, addressId: getCurrentAddress?._id }))
           .then(data => {
-            if (data?.payload?.success) {
-              // Si la eliminación es exitosa, obtenemos la lista actualizada de direcciones
+            
+            // Ajuste en la condición para evitar el error tipográfico
+            if (data?.payload?.success ) {
+              console.log("Dirección eliminada con éxito, actualizando lista...");
               dispatch(fetchAllAddresses(user?.id))
+                .then(response => console.log("fetchAllAddresses response:", response))
+                .catch(error => console.error("Error obteniendo direcciones:", error));
+                toast({
+                    title : 'address deleleted succssfully',
+                    variant : 'destructive'
+
+                })
+            } else {
+              console.warn("La eliminación no fue exitosa.");
             }
           })
           .catch(error => {
             console.error("Error eliminando la dirección:", error);
-            // Aquí puedes manejar el error, por ejemplo, mostrar un mensaje de error.
           });
-      }
+    }
       
-
-   
-    
-
-
-
+      
 
     function isFormValid(){
         return Object.keys(formData).map(key => formData[key].trim() !=='').
@@ -87,13 +133,18 @@ function Address (){
             {
                 addressList && addressList.length > 0 ?
                 addressList.map(singleAddressItem => <AddressCard 
-                    handleDeleteAddress={handleDeleteAddress}  
-                    addressInfo={singleAddressItem}/> ) : <p>hola</p>
+                    handleDeleteAddress={handleDeleteAddress} 
+                    handleEditAddress ={handleEditAddress}
+                    
+                    addressInfo={singleAddressItem}/> ) : <p>tu lista de direcciones esta vacia</p>
+                    
             }
         </div>
         <CardHeader>
             <CardTitle>
-                Add new address
+                {
+                    currentEditedId !== null? 'Edit Address' : 'add new address'
+                }
             </CardTitle>
         </CardHeader>
         <CardContent className ="space-y-3">
@@ -101,7 +152,7 @@ function Address (){
             formControls={addressFormControls}
             formData={formData}
             setFormData={setFormData}
-            buttonText={'add'}
+            buttonText={  currentEditedId !== null? "Edit Address":"add new address"}
             onSubmit={handleManageAddress}
             isBtnDisabled={!isFormValid()}
             

@@ -136,7 +136,7 @@ const deleteAddress = async( req ,res) =>{
         }
 
         res.status(200).json({
-            succes: true,
+            success: true,
             message : 'addres deleted successfully'
         })
 

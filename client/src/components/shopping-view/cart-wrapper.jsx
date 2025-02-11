@@ -1,8 +1,11 @@
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import UserCartItemstContent from "./cart-items-content";
 
 function UserCartWrapper({ cartItems }) {
+
+    const navigate  = useNavigate();
 
     const totalCartAmount = cartItems && cartItems.length >0 ? 
     cartItems.reduce((sum,currentItem) => sum +(
@@ -34,7 +37,7 @@ function UserCartWrapper({ cartItems }) {
                     <span className="font-bold">${totalCartAmount}</span> {/* Aquí el total es estático por ahora */}
                 </div>
             </div>
-            <Button className="w-full mt-6 bg-pink-600 hover:bg-pink-700">Checkout</Button>
+            <Button onClick={()=> navigate('/shop/checkout')} className="w-full mt-6 bg-pink-600 hover:bg-pink-700">Checkout</Button>
         </SheetContent>
     );
 }
