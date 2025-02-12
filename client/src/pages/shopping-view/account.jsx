@@ -1,8 +1,8 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import accImg from '../../assets/account2.jpg'
 import { TabsContent } from '@radix-ui/react-tabs';
-import Orders from '@/components/shopping-view/orders';
 import Address from '@/components/shopping-view/address';
+import ShoppingOrders from '@/components/shopping-view/orders';
 
 function ShoppingAccount(){
 
@@ -25,7 +25,7 @@ function ShoppingAccount(){
                         <TabsTrigger value = "address"> Address</TabsTrigger>
                     </TabsList>
                     <TabsContent value='orders'>
-                         <Orders/>
+                         <ShoppingOrders/>
                     </TabsContent>
                     <TabsContent value='address'>
                         <Address/>
