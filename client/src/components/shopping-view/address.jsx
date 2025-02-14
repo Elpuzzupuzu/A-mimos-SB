@@ -17,7 +17,7 @@ const initialAddressFormData = {
 }
 
 
-function Address (){
+function Address ({setCurrentSelectedAddress}){
 
     const[formData , setFormData] = useState(initialAddressFormData)
     const[currentEditedId, setCurrentEditedId] = useState(null); 
@@ -135,6 +135,7 @@ function Address (){
                 addressList.map(singleAddressItem => <AddressCard 
                     handleDeleteAddress={handleDeleteAddress} 
                     handleEditAddress ={handleEditAddress}
+                    setCurrentSelectedAddress={setCurrentSelectedAddress}
                     
                     addressInfo={singleAddressItem}/> ) : <p>tu lista de direcciones esta vacia</p>
                     
