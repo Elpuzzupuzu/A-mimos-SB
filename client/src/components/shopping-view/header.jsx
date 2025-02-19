@@ -46,16 +46,15 @@ function MenuItems (){
     </nav>
 }
 
-function HeaderRightContent (){
-    const {user} = useSelector((state)=> state.auth);
-    const {cartItems} =useSelector(state => state.shopCart)
-    const [openCartSheet , setOpenCartSheet] = useState(false)
+function HeaderRightContent() {
+    const { user } = useSelector((state) => state.auth);
+    const { cartItems } = useSelector(state => state.shopCart);
+    const [openCartSheet, setOpenCartSheet] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    function handleLogout(){
-        dispatch(logoutUser())
-
+    function handleLogout() {
+        dispatch(logoutUser());
     }
 
     useEffect(() => {
@@ -63,57 +62,57 @@ function HeaderRightContent (){
             dispatch(fetchCartItems(user.id));
         }
     }, [dispatch, user?.id]);
-    
 
-    // console.log("Estado del carrito en Redux:", cartItems);
-
-    // Verifica el estado de cartItems después de la carga
-        useEffect(() => {
-            // console.log("Estado de cartItems en el useEffect:", cartItems);
-        }, [cartItems]);
-            
-
-
-    return <div className=" flex lg:items-center lg:flex-row flex-col gap-4 px-4">
-        <Sheet open={openCartSheet} onOpenChange={()=> setOpenCartSheet(false)}>
-        <Button onClick={()=> setOpenCartSheet(true)} className="relative" variant="outline" size="icon">
-            <ShoppingCart className="w-6 h-6" />
-            {cartItems && cartItems.items && cartItems.items.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center p-1">
-                    {cartItems.items.length}
-                </span>
-            )}
-            <span className="sr-only">User Cart</span>
-        </Button>
-        <UserCartWrapper 
-            setOpenCartSheet={setOpenCartSheet}
-                cartItems={cartItems && cartItems.items && cartItems.items.length > 0 ? cartItems.items : []} 
-            /> 
+    return <div className="flex lg:items-center lg:flex-row flex-col gap-4 px-4">
+        <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
+            <Button onClick={() => setOpenCartSheet(true)} className="relative" variant="outline" size="icon">
+                <ShoppingCart className="w-6 h-6" />
+                {cartItems && cartItems.items && cartItems.items.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center p-1">
+                        {cartItems.items.length}
+                    </span>
+                )}
+                <span className="sr-only">User Cart</span>
+            </Button>
+            <UserCartWrapper
+                setOpenCartSheet={setOpenCartSheet}
+                cartItems={cartItems && cartItems.items && cartItems.items.length > 0 ? cartItems.items : []}
+            />
         </Sheet>
-      
+
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Avatar className="bg-pink-600 rounded-full">
-                    <AvatarFallback className= "w-10 h-10bg-black text-white font-extrabold">
+                        <AvatarFallback className= "w-10 h-10bg-black text-white font-extrabold">
                         {user?.userName.slice(0,2).toUpperCase()}
-                        </AvatarFallback>
-                </Avatar>
-
+                            </AvatarFallback>
+                    </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" className="w-56 justify-between px-10">
-                <DropdownMenuLabel>Logged in as {user?.userName} </DropdownMenuLabel>
-                <DropdownMenuSeparator/>
-                <DropdownMenuItem className="cursor-pointer"  onClick={()=>navigate('/shop/account')}>
-                    <UserRound className ="mr-2 h-4 w-4 "/>
+            <DropdownMenuContent 
+                side="right" 
+                className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 p-2"
+            >
+                <div className="px-3 py-2">
+                    <DropdownMenuLabel className="text-sm text-gray-700">
+                        Logged in as <span className="font-medium text-pink-600">{user?.userName}</span>
+                    </DropdownMenuLabel>
+                </div>
+                <DropdownMenuSeparator className="my-1 border-t border-gray-100" />
+                <DropdownMenuItem 
+                    className="px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md cursor-pointer flex items-center"
+                    onClick={() => navigate('/shop/account')}
+                >
+                    <UserRound className="mr-2 h-4 w-4" />
                     Account
                 </DropdownMenuItem>
-                <DropdownMenuSeparator/>
-                <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4"/>
-                    LogOut
+                <DropdownMenuSeparator className="my-1 border-t border-gray-100" />
+                <DropdownMenuItem 
+                    className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer flex items-center"
+                    onClick={handleLogout}
+                >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log Out
                 </DropdownMenuItem>
-
-
             </DropdownMenuContent>
         </DropdownMenu>
     </div>
@@ -162,3 +161,82 @@ function ShoppingHeader(){
 }
 
 export default ShoppingHeader;
+
+
+
+
+///version de pruebas:
+
+
+// function HeaderRightContent (){
+//     const {user} = useSelector((state)=> state.auth);
+//     const {cartItems} =useSelector(state => state.shopCart)
+//     const [openCartSheet , setOpenCartSheet] = useState(false)
+//     const navigate = useNavigate();
+//     const dispatch = useDispatch();
+
+//     function handleLogout(){
+//         dispatch(logoutUser())
+
+//     }
+
+//     useEffect(() => {
+//         if (user?.id) {
+//             dispatch(fetchCartItems(user.id));
+//         }
+//     }, [dispatch, user?.id]);
+    
+
+//     // console.log("Estado del carrito en Redux:", cartItems);
+
+//     // Verifica el estado de cartItems después de la carga
+//         useEffect(() => {
+//             // console.log("Estado de cartItems en el useEffect:", cartItems);
+//         }, [cartItems]);
+            
+
+
+//     return <div className=" flex lg:items-center lg:flex-row flex-col gap-4 px-4">
+//         <Sheet open={openCartSheet} onOpenChange={()=> setOpenCartSheet(false)}>
+//         <Button onClick={()=> setOpenCartSheet(true)} className="relative" variant="outline" size="icon">
+//             <ShoppingCart className="w-6 h-6" />
+//             {cartItems && cartItems.items && cartItems.items.length > 0 && (
+//                 <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center p-1">
+//                     {cartItems.items.length}
+//                 </span>
+//             )}
+//             <span className="sr-only">User Cart</span>
+//         </Button>
+//         <UserCartWrapper 
+//             setOpenCartSheet={setOpenCartSheet}
+//                 cartItems={cartItems && cartItems.items && cartItems.items.length > 0 ? cartItems.items : []} 
+//             /> 
+//         </Sheet>
+      
+//         <DropdownMenu>
+//             <DropdownMenuTrigger asChild>
+//                 <Avatar className="bg-pink-600 rounded-full">
+//                     <AvatarFallback className= "w-10 h-10bg-black text-white font-extrabold">
+//                         {user?.userName.slice(0,2).toUpperCase()}
+//                         </AvatarFallback>
+//                 </Avatar>
+
+//             </DropdownMenuTrigger>
+//             <DropdownMenuContent side="right" className="w-56 justify-between px-10">
+//                 <DropdownMenuLabel>Logged in as {user?.userName} </DropdownMenuLabel>
+//                 <DropdownMenuSeparator/>
+//                 <DropdownMenuItem className="cursor-pointer"  onClick={()=>navigate('/shop/account')}>
+//                     <UserRound className ="mr-2 h-4 w-4 "/>
+//                     Account
+//                 </DropdownMenuItem>
+//                 <DropdownMenuSeparator/>
+//                 <DropdownMenuItem onClick={handleLogout}>
+//                     <LogOut className="mr-2 h-4 w-4"/>
+//                     LogOut
+//                 </DropdownMenuItem>
+
+
+//             </DropdownMenuContent>
+//         </DropdownMenu>
+//     </div>
+// }
