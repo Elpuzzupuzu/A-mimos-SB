@@ -167,3 +167,184 @@ function Address ({setCurrentSelectedAddress}){
 
 
 export default Address;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////TEST
+
+// import { useEffect, useState } from "react";
+// import CommonForm from "../common/form";
+// import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+// import { addressFormControls } from "@/config";
+// import { Item } from "@radix-ui/react-dropdown-menu";
+// import { useDispatch, useSelector } from "react-redux";
+// import { addNewAddress, deleteAddress, editaAddress, fetchAllAddresses } from "@/store/shop/address-slice";
+// import AddressCard from "@/pages/shopping-view/address-card";
+// import { useToast } from "@/hooks/use-toast";
+
+// const initialAddressFormData = {
+//     address: '',
+//     city: '',
+//     phone: '',
+//     pincode: '',
+//     notes: ''
+// }
+
+// function Address({ setCurrentSelectedAddress }) {
+//     const [formData, setFormData] = useState(initialAddressFormData);
+//     const [currentEditedId, setCurrentEditedId] = useState(null);
+//     const [selectedAddressId, setSelectedAddressId] = useState(null);
+//     const dispatch = useDispatch();
+//     const { user } = useSelector(state => state.auth);
+//     const { addressList } = useSelector(state => state.shopAddress);
+//     const { toast } = useToast();
+
+//     // Keep all your existing functions
+//     function handleManageAddress(event) {
+//         event.preventDefault();
+
+//         if (addressList.length >= 3 && currentEditedId === null) {
+//             setFormData(initialAddressFormData);
+//             toast({
+//                 title: 'You can add max 3 address',
+//                 variant: 'destructive'
+//             });
+//             return;
+//         }
+
+//         currentEditedId !== null ? dispatch(editaAddress({
+//             userId: user?.id,
+//             addressId: currentEditedId,
+//             formData
+//         })).then((data) => {
+//             if (data?.payload?.success) {
+//                 dispatch(fetchAllAddresses(user?.id));
+//                 setCurrentEditedId(null);
+//                 setFormData(initialAddressFormData);
+//                 toast({
+//                     title: 'address updated successfully'
+//                 });
+//             }
+//         }) :
+
+//             dispatch(addNewAddress({
+//                 ...formData,
+//                 userId: user?.id
+//             })).then(data => {
+//                 if (data?.payload?.success) {
+//                     dispatch(fetchAllAddresses(user?.id));
+//                     setFormData(initialAddressFormData);
+//                     toast({
+//                         title: 'address added successfully'
+//                     });
+//                 }
+//             });
+//     }
+
+//     function handleEditAddress(getCurrentAddress) {
+//         setCurrentEditedId(getCurrentAddress?._id);
+//         setFormData({
+//             ...formData,
+//             address: getCurrentAddress?.address,
+//             city: getCurrentAddress?.city,
+//             phone: getCurrentAddress?.phone,
+//             pincode: getCurrentAddress?.pincode,
+//             notes: getCurrentAddress?.notes
+//         });
+//     }
+
+//     function handleDeleteAddress(getCurrentAddress) {
+//         dispatch(deleteAddress({ userId: user?.id, addressId: getCurrentAddress?._id }))
+//             .then(data => {
+//                 if (data?.payload?.success) {
+//                     dispatch(fetchAllAddresses(user?.id))
+//                         .then(response => console.log("fetchAllAddresses response:", response))
+//                         .catch(error => console.error("Error obteniendo direcciones:", error));
+//                     toast({
+//                         title: 'address deleted successfully',
+//                         variant: 'destructive'
+//                     });
+//                     // Clear selection if deleted address was selected
+//                     if (selectedAddressId === getCurrentAddress?._id) {
+//                         setSelectedAddressId(null);
+//                         setCurrentSelectedAddress(null);
+//                     }
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error("Error eliminando la dirección:", error);
+//             });
+//     }
+
+//     function handleSelectAddress(address) {
+//         setSelectedAddressId(address._id);
+//         setCurrentSelectedAddress(address);
+//     }
+
+//     function isFormValid() {
+//         return Object.keys(formData).map(key => formData[key].trim() !== '').
+//             every((Item) => Item);
+//     }
+
+//     useEffect(() => {
+//         if (user?.id) {
+//             dispatch(fetchAllAddresses(user?.id));
+//         }
+//     }, [dispatch, user]);
+
+//     return (
+//         <Card>
+//             <div className="mb-5 p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+//                 {addressList && addressList.length > 0 ? (
+//                     addressList.map(singleAddressItem => (
+//                         <div
+//                             key={singleAddressItem._id}
+//                             onClick={() => handleSelectAddress(singleAddressItem)}
+//                             className={`cursor-pointer transition-all duration-200 
+//                                 ${selectedAddressId === singleAddressItem._id 
+//                                     ? 'ring-2 ring-blue-500 bg-blue-50' 
+//                                     : 'hover:bg-gray-50'}`}
+//                         >
+//                             <AddressCard
+//                                 handleDeleteAddress={handleDeleteAddress}
+//                                 handleEditAddress={handleEditAddress}
+//                                 setCurrentSelectedAddress={setCurrentSelectedAddress}
+//                                 addressInfo={singleAddressItem}
+//                             />
+//                         </div>
+//                     ))
+//                 ) : (
+//                     <p>tu lista de direcciones esta vacia</p>
+//                 )}
+//             </div>
+//             <CardHeader>
+//                 <CardTitle>
+//                     {currentEditedId !== null ? 'Edit Address' : 'add new address'}
+//                 </CardTitle>
+//             </CardHeader>
+//             <CardContent className="space-y-3">
+//                 <CommonForm
+//                     formControls={addressFormControls}
+//                     formData={formData}
+//                     setFormData={setFormData}
+//                     buttonText={currentEditedId !== null ? "Edit Address" : "add new address"}
+//                     onSubmit={handleManageAddress}
+//                     isBtnDisabled={!isFormValid()}
+//                 />
+//             </CardContent>
+//         </Card>
+//     );
+// }
+
+// export default Address;
