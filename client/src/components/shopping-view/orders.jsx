@@ -5,7 +5,7 @@ import { Dialog } from "../ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import ShoppingOrderDetailsView from "./order-details";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrdersByUserId } from "@/store/shop/order-slice";
+import { getAllOrdersByUserId, getOrderDetails } from "@/store/shop/order-slice";
 import { Badge } from "../ui/badge";
 
 
@@ -18,8 +18,19 @@ function ShoppingOrders (){
     const dispatch = useDispatch();
 
     const {user} =useSelector((state) => state.auth);
-    const {orderList} = useSelector((state)=> state.shopOrder);
+    const {orderList,orderDetails} = useSelector((state)=> state.shopOrder);
+    
 
+
+    function handleFetchOrderDetails(getId){
+        dispatch(getOrderDetails(getId))
+
+    }
+    
+
+    useEffect(()=>{
+        if(orderDetails !== null) setOpenDetailsDialog(true);
+    },[orderDetails])
 
 
     useEffect(()=>{
@@ -27,7 +38,7 @@ function ShoppingOrders (){
 
     },[dispatch , user?.id])
 
-    console.log(orderList, "ORDER LIST");
+    console.log(orderDetails, "ORDER DETAILS");
     
 
 
@@ -61,7 +72,7 @@ function ShoppingOrders (){
                             <TableCell>${orderItem?.totalAmount}</TableCell>
                             <TableCell>
                                 <Dialog open={openDetailsDialog} onOpenChange={setOpenDetailsDialog}>
-                                <Button onClick={()=>setOpenDetailsDialog(true)}>View Details</Button>
+                                <Button onClick={()=>handleFetchOrderDetails(orderItem?._id)}>View Details</Button>
                                 <ShoppingOrderDetailsView/>
                                 </Dialog>
                                
