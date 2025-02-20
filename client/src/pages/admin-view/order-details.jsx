@@ -13,7 +13,7 @@ function AdminOrderDetailsView() {
 
     function handleUpdateStatus(event) {
         event.preventDefault();
-        console.log("Updated status:", formData.status);
+       
     }
 
     return (

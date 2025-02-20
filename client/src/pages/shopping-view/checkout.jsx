@@ -9,106 +9,79 @@ import { useToast } from '@/hooks/use-toast';
 
 function ShoppingCheckout() {
     const { cartItems } = useSelector(state => state.shopCart);
-    const {user} =useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
     const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
-    const {approvalURL} = useSelector(state => state.shopOrder)
-    const [isPaymentStart ,setIsPaymentStart] = useState(false)
-    const dispatch = useDispatch()
-    const {toast} = useToast();
-    // console.log(cartItems, "prueba del checkout");
+    const { approvalURL } = useSelector(state => state.shopOrder);
+    const [isPaymentStart, setIsPaymentStart] = useState(false);
+    const dispatch = useDispatch();
+    const { toast } = useToast();
 
-    // console.log(currentSelectedAddress, "address")
-
-    function handleInitiatePaypalPayment(){
-
-        const totalCartAmount = cartItems && cartItems.items && cartItems.items.length > 0
-        ? cartItems.items.reduce((sum, currentItem) => 
-            sum + ((currentItem?.salePrice > 0 ? currentItem?.salePrice : currentItem?.price) * currentItem?.quantity), 0
-        ) 
-        : 0;
-        if(cartItems && cartItems.items && cartItems.items.length === 0){
-            toast({
-                title : 'your cart is empty',
-                variant : 'destructive'
-
-            })
-
-        }
-
-        if(currentSelectedAddress === null){
-            toast({
-                title : 'please select one address to proceed',
-                variant : 'destructive'
-
-            })
-
-        }
-
-
-        
-        if(cartItems.length === 0){
-            toast({
-                title : 'your card is empty ',
-                variant : 'destructive'
-
-            })
-
-        }
-        
-        const orderData ={
-            userId : user?.id,
-            cartId : cartItems?._id,
-            
-            cartItems: cartItems.items.map(singleCartItem=> ({
-                productId : singleCartItem?.id,
-                title : singleCartItem?.title ,
-                image : singleCartItem?.image,
-                price : singleCartItem?.salePrice > 0 ? singleCartItem?.salePrice : singleCartItem?.price, 
-                quantity : singleCartItem?.quantity
-            })),
-            addressInfo : {
-                addressId : currentSelectedAddress?._id,
-                address : currentSelectedAddress?.address,
-                city : currentSelectedAddress?.city ,
-                pincode : currentSelectedAddress?.pincode,
-                phone : currentSelectedAddress?.phone,
-                notes: currentSelectedAddress?.notes
-            }, 
-            orderStatus : 'pending',
-            paymentMethods : 'paypal',
-            paymentStatus : 'pending',
-            totalAmount : totalCartAmount,
-            orderDate : new Date(),
-            orderUpdate : new Date(),
-            paymentId : '',
-            payerId : '',
-        }
-
-        console.log(orderData, "payment data");
-        dispatch(createNewOrder(orderData)).then((data)=>{
-            console.log(data , "data");
-            if(data?.payload?.success){
-
-                setIsPaymentStart(true)
-            }else{
-                setIsPaymentStart(false)
-            }
-            
-        })
-        
-    }
-
-    if(approvalURL){
-        window.location.href = approvalURL
-    }
-
-
-
+    // Calcular el total del carrito
     const totalCartAmount = cartItems && cartItems.items && cartItems.items.length > 0
         ? cartItems.items.reduce((sum, currentItem) => 
             sum + ((currentItem?.salePrice > 0 ? currentItem?.salePrice : currentItem?.price) * currentItem?.quantity), 0
         ) 
         : 0;
+
+    function handleInitiatePaypalPayment() {
+        if (cartItems && cartItems.items && cartItems.items.length === 0) {
+            toast({
+                title: 'Your cart is empty',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        if (currentSelectedAddress === null) {
+            toast({
+                title: 'Please select one address to proceed',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        const orderData = {
+            userId: user?.id,
+            cartId: cartItems?._id,
+            cartItems: cartItems.items.map(singleCartItem => ({
+                productId: singleCartItem?.id,
+                title: singleCartItem?.title,
+                image: singleCartItem?.image,
+                price: singleCartItem?.salePrice > 0 ? singleCartItem?.salePrice : singleCartItem?.price, 
+                quantity: singleCartItem?.quantity
+            })),
+            addressInfo: {
+                addressId: currentSelectedAddress?._id,
+                address: currentSelectedAddress?.address,
+                city: currentSelectedAddress?.city,
+                pincode: currentSelectedAddress?.pincode,
+                phone: currentSelectedAddress?.phone,
+                notes: currentSelectedAddress?.notes
+            },
+            orderStatus: 'pending',
+            paymentMethods: 'paypal',
+            paymentStatus: 'pending',
+            totalAmount: totalCartAmount,
+            orderDate: new Date(),
+            orderUpdate: new Date(),
+            paymentId: '',
+            payerId: '',
+        };
+
+        console.log(orderData, "Payment Data");
+        
+        dispatch(createNewOrder(orderData)).then((data) => {
+            if (data?.payload?.success) {
+                setIsPaymentStart(true);
+            } else {
+                setIsPaymentStart(false);
+            }
+        });
+    }
+
+    if (approvalURL) {
+        window.location.href = approvalURL;
+    }
 
     return (
         <div className="flex flex-col">
@@ -123,6 +96,7 @@ function ShoppingCheckout() {
 
             {/* Contenido del checkout */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5 p-5">
+                {/* Sección de dirección */}
                 <Address setCurrentSelectedAddress={setCurrentSelectedAddress} />
 
                 {/* Sección de items del carrito */}
@@ -132,7 +106,7 @@ function ShoppingCheckout() {
                             <UserCartItemstContent key={item._id} cartItem={item} />
                         ))
                     ) : (
-                        <p>holaa</p>
+                        <p>Your cart is empty</p>
                     )}
 
                     {/* Total del carrito */}
@@ -142,11 +116,16 @@ function ShoppingCheckout() {
                             <span className="font-bold">${totalCartAmount}</span>
                         </div>
                     </div>
-                        <div className='mt-4 w-full'>
-                            <Button onClick={handleInitiatePaypalPayment}>
-                                CheckOut with paypal
-                            </Button>
-                        </div>
+                    
+                    {/* Botón de checkout */}
+                    <div className="mt-4 w-full">
+                        <Button 
+                            onClick={handleInitiatePaypalPayment}
+                            disabled={!currentSelectedAddress || !cartItems?.items?.length}
+                        >
+                            Checkout with PayPal
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -154,8 +133,6 @@ function ShoppingCheckout() {
 }
 
 export default ShoppingCheckout;
-
-
 
 
 

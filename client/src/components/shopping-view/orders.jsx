@@ -5,7 +5,7 @@ import { Dialog } from "../ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import ShoppingOrderDetailsView from "./order-details";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrdersByUserId, getOrderDetails } from "@/store/shop/order-slice";
+import { getAllOrdersByUserId, getOrderDetails, resetOrderDetails } from "@/store/shop/order-slice";
 import { Badge } from "../ui/badge";
 
 
@@ -38,7 +38,7 @@ function ShoppingOrders (){
 
     },[dispatch , user?.id])
 
-    console.log(orderDetails, "ORDER DETAILS");
+    // console.log(orderDetails, "ORDER DETAILS");
     
 
 
@@ -71,9 +71,9 @@ function ShoppingOrders (){
                             </TableCell>
                             <TableCell>${orderItem?.totalAmount}</TableCell>
                             <TableCell>
-                                <Dialog open={openDetailsDialog} onOpenChange={setOpenDetailsDialog}>
+                                <Dialog open={openDetailsDialog} onOpenChange={()=>{setOpenDetailsDialog(false); dispatch(resetOrderDetails())}}>
                                 <Button onClick={()=>handleFetchOrderDetails(orderItem?._id)}>View Details</Button>
-                                <ShoppingOrderDetailsView/>
+                                <ShoppingOrderDetailsView orderDetails={orderDetails}/>
                                 </Dialog>
                                
                             </TableCell>
