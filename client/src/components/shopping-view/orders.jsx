@@ -38,7 +38,7 @@ function ShoppingOrders (){
 
     },[dispatch , user?.id])
 
-    // console.log(orderDetails, "ORDER DETAILS");
+    console.log(orderDetails, "ORDER DETAILS");
     
 
 
@@ -80,8 +80,7 @@ function ShoppingOrders (){
                             
                         </TableRow>  )
                         : <p>hola :D</p>
-                    }
-                    
+                    }          
                 </TableBody>
             </Table>
         </CardContent>
