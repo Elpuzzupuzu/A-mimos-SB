@@ -8,20 +8,31 @@ import { Badge } from "../ui/badge";
 
 import AdminOrderDetailsView  from "./order-details"
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrdersForAdmin } from "@/store/admin/order-slice";
+import { getAllOrdersForAdmin, getOrderDetailsForAdmin, resetOrderDetails } from "@/store/admin/order-slice";
 
 function AdminOrdersView() {
     const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
     const dispatch = useDispatch();
-
     const {orderList,orderDetails} = useSelector((state)=> state.adminOrder);
 
-    useEffect(()=>{
+    function handleFetchOrderDetails(getId){
+        dispatch(getOrderDetailsForAdmin(getId))
 
+    }
+    
+    useEffect(()=>{
+        if(orderDetails !== null) setOpenDetailsDialog(true);
+    },[orderDetails])
+
+
+
+
+    useEffect(()=>{
         dispatch(getAllOrdersForAdmin())
     }, [dispatch])
+    console.log(orderDetails, "OD");
     
-    console.log(orderList, "pp")
+    // console.log(orderList, "pp")
 
     return (
         <Card>
@@ -55,12 +66,12 @@ function AdminOrdersView() {
                             <TableCell>${orderItem?.totalAmount}</TableCell>
                             <TableCell>
                                 <Dialog open={openDetailsDialog} 
-                                // onOpenChange={()=>
-                                // {setOpenDetailsDialog(false); 
-                                // dispatch(resetOrderDetails())}}
+                                onOpenChange={()=>
+                                {setOpenDetailsDialog(false); 
+                                dispatch(resetOrderDetails())}}
                                 >
                                 <Button 
-                                // onClick={()=>handleFetchOrderDetails(orderItem?._id)}
+                                onClick={()=>handleFetchOrderDetails(orderItem?._id)}
                                 >View Details</Button>
                                 <AdminOrderDetailsView orderDetails={orderDetails}/>
                                 </Dialog>
