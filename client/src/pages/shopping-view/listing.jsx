@@ -184,6 +184,8 @@ export default ShoppingListing;
 
 
 //// CANDIDATO A PAGINAR
+
+
 // function ShoppingListing() {
 //     const dispatch = useDispatch();
 //     const { productList, productDetails } = useSelector(state => state.shopProducts);
