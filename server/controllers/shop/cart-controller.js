@@ -1,6 +1,8 @@
-const Cart = require('../../models/Cart');
-const Product = require('../../models/Product');
 
+
+const supabase = require('../../config/supabase'); // Importamos el cliente de Supabase
+
+// Añadir al carrito
 const addToCart = async (req, res) => {
     try {
         const { userId, productId, quantity } = req.body;
@@ -11,30 +13,103 @@ const addToCart = async (req, res) => {
             });
         }
 
-        const product = await Product.findById(productId);
-        if (!product) {
+        // Verificar si el producto existe
+        const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+
+        if (productError || !product) {
             return res.status(404).json({
                 success: false,
                 message: "Product not found"
             });
         }
 
-        let cart = await Cart.findOne({ userId });
-        if (!cart) {
-            cart = new Cart({ userId, items: [] });
-        }
+        // Buscar si el carrito ya existe para el usuario
+        const { data: cart, error: cartError } = await supabase
+            .from('carts')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
 
-        const findCurrentProductIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-        if (findCurrentProductIndex === -1) {
-            cart.items.push({ productId, quantity });
+        let cartId = null;
+        if (cartError || !cart) {
+            // Si no existe, crear un nuevo carrito
+            const { data: cartInsert, error: cartInsertError } = await supabase
+                .from('carts')
+                .insert([{ user_id: userId }])
+                .select('id')
+                .single();
+
+            if (cartInsertError) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Error creating cart"
+                });
+            }
+
+            cartId = cartInsert.id;
         } else {
-            cart.items[findCurrentProductIndex].quantity += quantity;
+            cartId = cart.id;
         }
 
-        await cart.save();
+        // Verificar si el producto ya está en el carrito
+        const { data: cartItem, error: cartItemError } = await supabase
+            .from('cart_items')
+            .select('*')
+            .eq('cart_id', cartId)
+            .eq('product_id', productId)
+            .single();
+
+        if (cartItemError || !cartItem) {
+            // Si no existe el producto, agregarlo al carrito
+            const { error: insertError } = await supabase
+                .from('cart_items')
+                .insert([{ cart_id: cartId, product_id: productId, quantity }]);
+
+            if (insertError) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Error adding product to cart"
+                });
+            }
+        } else {
+            // Si el producto ya está en el carrito, actualizar la cantidad
+            const { error: updateError } = await supabase
+                .from('cart_items')
+                .update({ quantity: cartItem.quantity + quantity })
+                .eq('cart_id', cartId)
+                .eq('product_id', productId);
+
+            if (updateError) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Error updating cart item"
+                });
+            }
+        }
+
+        // Obtener los productos del carrito con la información completa
+        const { data: cartItems, error: cartItemsError } = await supabase
+            .from('cart_items')
+            .select('product_id, quantity, products(image, title, price, salePrice)')
+            .eq('cart_id', cartId);
+
+        if (cartItemsError) {
+            return res.status(500).json({
+                success: false,
+                message: "Error fetching cart items"
+            });
+        }
+
         res.status(200).json({
             success: true,
-            data: cart
+            data: {
+                cartId,
+                items: cartItems
+            }
         });
 
     } catch (error) {
@@ -45,6 +120,11 @@ const addToCart = async (req, res) => {
         });
     }
 };
+
+
+////
+
+
 
 const fetchCartItems = async (req, res) => {
     try {
@@ -56,33 +136,41 @@ const fetchCartItems = async (req, res) => {
             });
         }
 
-        const cart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-            select: "image title price salePrice"
-        });
+        // Obtener el carrito del usuario
+        const { data: cart, error: cartError } = await supabase
+            .from('carts')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
 
-        if (!cart) {
+        if (cartError || !cart) {
             return res.status(404).json({
                 success: false,
                 message: "Cart not found"
             });
         }
 
-        cart.items = cart.items.filter(item => item.productId);
-        await cart.save();
+        const cartId = cart.id;
 
-        const populatedCartItems = cart.items.map(item => ({
-            productId: item.productId._id,
-            image: item.productId.image,
-            title: item.productId.title,
-            price: item.productId.price,
-            salePrice: item.productId.salePrice,
-            quantity: item.quantity
-        }));
+        // Obtener los productos del carrito
+        const { data: cartItems, error: cartItemsError } = await supabase
+            .from('cart_items')
+            .select('product_id, quantity, products(image, title, price, salePrice)')
+            .eq('cart_id', cartId);
+
+        if (cartItemsError) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to retrieve cart items"
+            });
+        }
 
         res.status(200).json({
             success: true,
-            data: { ...cart._doc, items: populatedCartItems }
+            data: {
+                cartId,
+                items: cartItems
+            }
         });
 
     } catch (error) {
@@ -93,6 +181,9 @@ const fetchCartItems = async (req, res) => {
         });
     }
 };
+
+/////
+
 
 const updateCartQuantity = async (req, res) => {
     try {
@@ -104,42 +195,66 @@ const updateCartQuantity = async (req, res) => {
             });
         }
 
-        const cart = await Cart.findOne({ userId });
-        if (!cart) {
+        const { data: cart, error: cartError } = await supabase
+            .from('carts')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+        if (cartError || !cart) {
             return res.status(404).json({
                 success: false,
                 message: "Cart not found"
             });
         }
 
-        const findCurrentProductIndex = cart.items.findIndex((item) => item.productId.toString() === productId);
-        if (findCurrentProductIndex === -1) {
+        const cartId = cart.id;
+
+        const { data: cartItem, error: cartItemError } = await supabase
+            .from('cart_items')
+            .select('*')
+            .eq('cart_id', cartId)
+            .eq('product_id', productId)
+            .single();
+
+        if (cartItemError || !cartItem) {
             return res.status(404).json({
                 success: false,
                 message: "Cart item not present"
             });
         }
 
-        cart.items[findCurrentProductIndex].quantity = quantity;
-        await cart.save();
-        await cart.populate({
-            path: 'items.productId',
-            select: "image title price salePrice"
-        });
+        const { error: updateError } = await supabase
+            .from('cart_items')
+            .update({ quantity })
+            .eq('cart_id', cartId)
+            .eq('product_id', productId);
 
-        const populatedCartItems = cart.items.map((item) => ({
-            productId: item.productId ? item.productId._id : null,
-            image: item.productId ? item.productId.image : null,
-            title: item.productId ? item.productId.title : 'Product not found',
-            price: item.productId ? item.productId.price : null,
-            salePrice: item.productId ? item.productId.salePrice : null,
-            quantity: item.quantity
-        }));
+        if (updateError) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to update cart item"
+            });
+        }
+
+        const { data: updatedCartItems, error: updatedCartItemsError } = await supabase
+            .from('cart_items')
+            .select('product_id, quantity, products(image, title, price, salePrice)')
+            .eq('cart_id', cartId);
+
+        if (updatedCartItemsError) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to retrieve updated cart items"
+            });
+        }
 
         res.status(200).json({
             success: true,
-            data: { ...cart._doc,
-                 items: populatedCartItems }
+            data: {
+                cartId,
+                items: updatedCartItems
+            }
         });
 
     } catch (error) {
@@ -150,6 +265,10 @@ const updateCartQuantity = async (req, res) => {
         });
     }
 };
+
+
+
+/////
 
 const deleteCartItem = async (req, res) => {
     try {
@@ -161,40 +280,52 @@ const deleteCartItem = async (req, res) => {
             });
         }
 
-        const cart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-            select: "image title price salePrice"
-        });
-        
-        
+        const { data: cart, error: cartError } = await supabase
+            .from('carts')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
 
-        if (!cart) {
+        if (cartError || !cart) {
             return res.status(404).json({
                 success: false,
                 message: "Cart not found"
             });
         }
 
-        cart.items = cart.items.filter(item => item.productId._id.toString() !== productId);
-        await cart.save();
+        const cartId = cart.id;
 
-        await cart.populate({
-            path: "items.productId",
-            select: "image title price salePrice"
-        });
+        const { error: deleteError } = await supabase
+            .from('cart_items')
+            .delete()
+            .eq('cart_id', cartId)
+            .eq('product_id', productId);
 
-        const populatedCartItems = cart.items.map(item => ({
-            productId: item.productId ? item.productId._id : null,
-            image: item.productId ? item.productId.image : null,
-            title: item.productId ? item.productId.title : 'Product not found',
-            price: item.productId ? item.productId.price : null,
-            salePrice: item.productId ? item.productId.salePrice : null,
-            quantity: item.quantity
-        }));
+        if (deleteError) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to delete cart item"
+            });
+        }
+
+        const { data: updatedCartItems, error: updatedCartItemsError } = await supabase
+            .from('cart_items')
+            .select('product_id, quantity, products(image, title, price, salePrice)')
+            .eq('cart_id', cartId);
+
+        if (updatedCartItemsError) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to retrieve updated cart items"
+            });
+        }
 
         res.status(200).json({
             success: true,
-            data: { ...cart._doc, items: populatedCartItems }
+            data: {
+                cartId,
+                items: updatedCartItems
+            }
         });
 
     } catch (error) {
@@ -205,6 +336,9 @@ const deleteCartItem = async (req, res) => {
         });
     }
 };
+
+
+// Otras funciones (fetchCartItems, updateCartQuantity, deleteCartItem) también deben actualizarse de manera similar
 
 module.exports = {
     addToCart,
