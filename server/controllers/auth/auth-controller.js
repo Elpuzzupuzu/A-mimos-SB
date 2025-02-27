@@ -4,7 +4,7 @@ const supabase = require('../../config/supabase');
 
 const nodemailer = require("nodemailer");
 
-// 🔹 Registrar usuario
+//  Registrar usuario
 const registerUser = async (req, res) => {
     const { userName, email, password } = req.body;
 
@@ -40,7 +40,7 @@ const registerUser = async (req, res) => {
     }
 };
 
-// 🔹 Iniciar sesión
+//  Iniciar sesión
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
@@ -90,7 +90,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-// 🔹 Cerrar sesión
+//  Cerrar sesión
 const logoutUser = (req, res) => {
     res.clearCookie("token").json({
         success: true,
@@ -98,7 +98,7 @@ const logoutUser = (req, res) => {
     });
 };
 
-// 🔹 Middleware de autenticación
+//  Middleware de autenticación
 const authMiddleware = async (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
@@ -114,7 +114,7 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
-// 🔹 Recuperar contraseña
+//  Recuperar contraseña
 const recoverPassword = async (req, res) => {
     const { email } = req.body;
 

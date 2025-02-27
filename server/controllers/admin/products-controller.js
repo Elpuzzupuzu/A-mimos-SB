@@ -102,6 +102,10 @@ const fetchAllProducts = async (req, res) => {
     }
 };
 
+
+
+
+
 // Editar un producto
 const editProduct = async (req, res) => {
     try {

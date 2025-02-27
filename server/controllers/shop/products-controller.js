@@ -1,35 +1,49 @@
 const supabase = require('../../config/supabase'); // Asegúrate de importar el cliente de Supabase
 
 // Obtener productos filtrados y ordenados
+
+// Obtener productos con filtros dinámicos
 const getFilteredProducts = async (req, res) => {
     try {
-        const { category = '', brand = '', sortBy = "price-lowtohigh" } = req.query;
+        let { title, category, brand, minPrice, maxPrice, sortBy } = req.query;
+        let query = supabase.from("products").select("*");
 
-        console.log('Received Filters:', { category, brand, sortBy });
+        // Aplicar filtros condicionales
+        if (title) query = query.ilike("title", `%${title}%`);
+        if (category) query = query.eq("category", category);
+        if (brand) query = query.eq("brand", brand);
+        if (minPrice) query = query.gte("price", minPrice);
+        if (maxPrice) query = query.lte("price", maxPrice);
 
-        // Filtro solo por categoría
-        let { data: products, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('category', category); // Solo aplicar filtro de categoría
+        // Ordenar resultados
+        if (sortBy === "price-highlow") {
+            query = query.order("price", { ascending: false });
+        } else if (sortBy === "price-lowtohigh") {
+            query = query.order("price", { ascending: true });
+        }
 
-        console.log('Fetched Products (category filter):', products); // Verificar si se trae algún producto
+        // Ejecutar la consulta
+        const { data, error } = await query;
 
         if (error) throw error;
 
         res.status(200).json({
             success: true,
-            data: products
+            data,
         });
-
-    } catch (error) {
-        console.log(error);
+    } catch (e) {
+        console.log(e);
         res.status(500).json({
             success: false,
-            message: 'Some error occurred'
+            message: "Error occurred",
         });
     }
-}
+};
+
+
+
+
+
 
 
 // Obtener producto por ID
