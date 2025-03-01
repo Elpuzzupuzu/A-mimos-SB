@@ -1,158 +1,183 @@
+const supabase = require('../../config/supabase');
 
+// Agregar una nueva dirección
+// Backend: Creación de dirección
+const addAddress = async (req, res) => {
+    try {
+        const { userId, address, city, pincode, phone, notes } = req.body;
 
-const   Address = require ('../../models/Address')
-
-const addAddress = async( req ,res) =>{
-    
-    try{
-
-        const{userId, address, city,pincode,phone,notes} = req.body;
-        if(!userId || !address || !city || !pincode || !phone || !notes){
+        if (!userId || !address || !city || !pincode || !phone || !notes) {
             return res.status(400).json({
-                success : false,
-                message : 'invalid data provide'
-            })
+                success: false,
+                message: 'Invalid data provided'
+            });
         }
 
-        const newlyCreatedAddress = new Address({
-            userId,address,city,pincode,phone,notes
-        })
+        const { data, error } = await supabase
+            .from('addresses')
+            .insert([{
+                userId,
+                address,
+                city,
+                pincode,
+                phone,
+                notes
+            }])
+            .single(); // Insertar una sola dirección
 
-        await newlyCreatedAddress.save();
+        if (error) {
+            console.log("Error al insertar la dirección:", error);
+            throw error;
+        }
+
+        console.log("Dirección insertada exitosamente:", data); // Verificar los datos insertados
 
         res.status(201).json({
-            success : true,
-            data : newlyCreatedAddress
-        })
-
-
-    }catch(error){
-        console.log (error)
+            success: true,
+            data  // Asegúrate de que los datos se estén devolviendo correctamente
+        });
+    } catch (error) {
+        console.log(error);
         res.status(500).json({
-            success : false,
-            message : 'something was wrong in the server'
-        })
-    }
-
-}
-
-//////
-
-const fecthAllAddress = async( req ,res) =>{
-    
-    try{
-        
-        const {userId} = req.params
-        if(!userId){
-            return res.status(400).json({
-                success : false,
-                message : 'user Id is required!'
-            })
-        }
-    
-        const addressList = await Address.find({userId})
-        res.status(200).json({
-            success:true,
-            data: addressList
-        })
-
-    }catch(error){
-        console.log (error)
-        res.status(500).json({
-            success : false,
-            message : 'something was wrong in the server'
-        })
-    }
-
-}
-
-//////
-
-const editAddress = async( req ,res) =>{
-    
-    try{
-
-        const {userId, addressId} = req.params;
-        const formData =  req.body
-
-        if(!userId || !addressId){
-            return res.status(400).json({
-                success : false,
-                message : 'user Id and adreddId are required!'
-            })
-        }
-
-        const address = await Address.findOneAndUpdate(
-            {
-            _id: addressId, userId
-        }, formData,
-        {new:  true}
-    );
-
-    if(!address){
-        return res.status(404).json({
             success: false,
-            message : 'address not found'
-        })
+            message: 'Something went wrong on the server'
+        });
     }
-
-    res.status(200).json({
-        success : true,
-        data : address
-    })
+};
 
 
-    }catch(error){
-        console.log (error)
-        res.status(500).json({
-            success : false,
-            message : 'something was wrong in the server'
-        })
-    }
+// Obtener todas las direcciones de un usuario
+const fetchAllAddress = async (req, res) => {
+    try {
+        const { userId } = req.params;
 
-}
+        console.log("User ID recibido:", userId); // Log del ID del usuario recibido
 
-
-//////
-
-const deleteAddress = async( req ,res) =>{
-    
-    try{
-
-        const {userId, addressId} = req.params;
-        if(!userId || !addressId){
+        if (!userId) {
             return res.status(400).json({
-                success : false,
-                message : 'user Id and adreddId are required!'
-            })
+                success: false,
+                message: 'User ID is required!'
+            });
         }
 
-        const address = await Address.findByIdAndDelete({_id : addressId, userId});
-        if(!address){
+        const { data, error } = await supabase
+            .from('addresses')
+            .select('*')
+            .eq('userId', userId);
+
+        console.log("Direcciones obtenidas:", data); // Log de las direcciones obtenidas
+
+        if (error || !data.length) {
+            console.log("Error o no hay direcciones para este usuario:", error); // Log de error si no hay datos
             return res.status(404).json({
                 success: false,
-                message : 'address not found'
-            })
+                message: 'No addresses found for this user'
+            });
         }
 
         res.status(200).json({
             success: true,
-            message : 'addres deleted successfully'
-        })
+            data
+        });
 
-
-
-    }catch(error){
-        console.log (error)
+    } catch (error) {
+        console.log("Error en fetchAllAddress:", error); // Log del error
         res.status(500).json({
-            sucess : false,
-            message : 'something was wrong in the server'
-        })
+            success: false,
+            message: 'Something went wrong on the server'
+        });
     }
+};
 
-}
+// Editar una dirección existente
+const editAddress = async (req, res) => {
+    try {
+        const { userId, addressId } = req.params;
+        const formData = req.body;
 
-////
+        console.log("Datos recibidos para editar la dirección:", { userId, addressId, formData }); // Log de los datos recibidos
 
-module.exports = {addAddress,fecthAllAddress,editAddress,deleteAddress}
+        if (!userId || !addressId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID and Address ID are required!'
+            });
+        }
 
+        const { data, error } = await supabase
+            .from('addresses')
+            .update(formData)
+            .match({ id: addressId, userId })
+            .single(); // Actualizar una sola dirección
+
+        if (error || !data) {
+            console.log("Error al editar la dirección:", error); // Log de error al editar
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        console.log("Dirección editada exitosamente:", data); // Log de la dirección editada
+
+        res.status(200).json({
+            success: true,
+            data
+        });
+
+    } catch (error) {
+        console.log("Error en editAddress:", error); // Log del error
+        res.status(500).json({
+            success: false,
+            message: 'Something went wrong on the server'
+        });
+    }
+};
+
+// Eliminar una dirección
+// Eliminar una dirección
+const deleteAddress = async (req, res) => {
+    try {
+        const { userId, addressId } = req.params;  // Usamos req.params para obtener los IDs desde la URL
+
+        if (!userId || !addressId) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID and Address ID are required!'
+            });
+        }
+
+        // Eliminar la dirección en Supabase
+        const { data, error } = await supabase
+            .from('addresses')
+            .delete()
+            .match({ id: addressId, userId })
+            .single();  // Eliminar solo una dirección
+
+        // Verificar si hubo un error o si no se encontró la dirección
+        if (error || !data) {
+            console.log("Error al eliminar dirección:", error);  // Log detallado del error
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        // Si todo fue bien, logueamos la dirección eliminada
+        console.log("Dirección eliminada con éxito:", data);  // Log de la dirección eliminada
+
+        // Respondemos con éxito
+        res.status(200).json({
+            success: true,
+            message: 'Address deleted successfully',
+            data  // Retornamos los datos de la dirección eliminada
+        });
+    } catch (error) {
+        console.error("Error al eliminar dirección:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Something went wrong on the server'
+        });
+    }
+};
+module.exports = { addAddress, fetchAllAddress, editAddress, deleteAddress };

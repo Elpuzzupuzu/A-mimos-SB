@@ -13,8 +13,7 @@ export const addNewAddress = createAsyncThunk(
       "http://localhost:5000/api/shop/address/add",
       formData
     );
-
-    return response.data;
+    return response.data.data;
   }
 );
 
@@ -24,7 +23,6 @@ export const fetchAllAddresses = createAsyncThunk(
     const response = await axios.get(
       `http://localhost:5000/api/shop/address/get/${userId}`
     );
-
     return response.data.data;
   }
 );
@@ -36,8 +34,7 @@ export const editaAddress = createAsyncThunk(
       `http://localhost:5000/api/shop/address/update/${userId}/${addressId}`,
       formData
     );
-
-    return response.data;
+    return response.data.data;
   }
 );
 
@@ -47,8 +44,7 @@ export const deleteAddress = createAsyncThunk(
     const response = await axios.delete(
       `http://localhost:5000/api/shop/address/delete/${userId}/${addressId}`
     );
-
-    return response.data;
+    return response.data.data; // Enviamos los datos de la dirección eliminada
   }
 );
 
@@ -63,13 +59,11 @@ const addressSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(addNewAddress.fulfilled, (state, action) => {
-        console.log('Datos recibidos:', action.payload); // Verifica si los datos son los esperados
         state.isLoading = false;
-        state.addressList = action.payload; // Esto debería ser el array de direcciones
+        state.addressList.push(action.payload); // Añadir la nueva dirección
       })
       .addCase(addNewAddress.rejected, (state) => {
         state.isLoading = false;
-        // state.addressList = []
       });
 
     // Fetch all addresses
@@ -79,12 +73,12 @@ const addressSlice = createSlice({
       })
       .addCase(fetchAllAddresses.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.addressList = action.payload;  // Aquí asignamos directamente el array de direcciones
+        state.addressList = action.payload; // Asignar la lista de direcciones
       })
       .addCase(fetchAllAddresses.rejected, (state) => {
         state.isLoading = false;
         state.addressList = [];
-        console.error('Error fetching addresses:', action.error.message);
+        console.error("Error fetching addresses:", action.error.message);
       });
 
     // Edit address
@@ -94,14 +88,13 @@ const addressSlice = createSlice({
       })
       .addCase(editaAddress.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Actualiza la dirección editada en la lista
+        const updatedAddress = action.payload;
         state.addressList = state.addressList.map((address) =>
-          address._id === action.payload._id ? action.payload : address
+          address.id === updatedAddress.id ? updatedAddress : address // Actualizar la dirección editada
         );
       })
       .addCase(editaAddress.rejected, (state) => {
         state.isLoading = false;
-        console.error('Error editing address:', action.error.message);
       });
 
     // Delete address
@@ -111,14 +104,18 @@ const addressSlice = createSlice({
       })
       .addCase(deleteAddress.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Elimina la dirección de la lista
-        state.addressList = state.addressList.filter(
-          (address) => address._id !== action.payload._id
-        );
+        // Verificar si la respuesta contiene los datos correctos
+        if (action.payload && action.payload.id) {
+          // Eliminar la dirección de la lista de manera optimista
+          state.addressList = state.addressList.filter(
+            (address) => address.id !== action.payload.id
+          );
+        } else {
+          console.warn("No se recibió un ID válido en la respuesta de eliminación.");
+        }
       })
       .addCase(deleteAddress.rejected, (state) => {
         state.isLoading = false;
-        console.error('Error deleting address:', action.error.message);
       });
   },
 });

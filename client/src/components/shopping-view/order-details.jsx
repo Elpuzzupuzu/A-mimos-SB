@@ -15,6 +15,8 @@ function ShoppingOrderDetailsView({ orderDetails }) {
     delivered: "bg-gray-500 text-white",
     rejected: "bg-red-500 text-white",
   };
+  
+  
 
   return (
     <DialogContent className="sm:max-w-[600px]">
