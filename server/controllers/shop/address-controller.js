@@ -50,9 +50,9 @@ const addAddress = async (req, res) => {
 const fetchAllAddress = async (req, res) => {
     try {
         const { userId } = req.params;
-
-        console.log("User ID recibido:", userId); // Log del ID del usuario recibido
-
+        
+        console.log("User ID recibido:", userId); // Solo una vez
+        
         if (!userId) {
             return res.status(400).json({
                 success: false,
@@ -60,20 +60,21 @@ const fetchAllAddress = async (req, res) => {
             });
         }
 
+        // Realiza la consulta de direcciones solo una vez
         const { data, error } = await supabase
             .from('addresses')
             .select('*')
             .eq('userId', userId);
 
-        console.log("Direcciones obtenidas:", data); // Log de las direcciones obtenidas
-
-        if (error || !data.length) {
-            console.log("Error o no hay direcciones para este usuario:", error); // Log de error si no hay datos
-            return res.status(404).json({
+        if (error) {
+            return res.status(500).json({
                 success: false,
-                message: 'No addresses found for this user'
+                message: 'Error fetching addresses',
+                error: error.message
             });
         }
+
+        console.log("Direcciones obtenidas:", data); // Verifica que esto solo se muestre una vez
 
         res.status(200).json({
             success: true,
@@ -81,13 +82,14 @@ const fetchAllAddress = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error en fetchAllAddress:", error); // Log del error
+        console.error("Error en fetchAllAddress:", error);
         res.status(500).json({
             success: false,
             message: 'Something went wrong on the server'
         });
     }
 };
+
 
 // Editar una dirección existente
 const editAddress = async (req, res) => {
