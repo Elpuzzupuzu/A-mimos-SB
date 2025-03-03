@@ -5,6 +5,7 @@ const API_BASE_URL = "http://localhost:5000/api/shop/cart";
 
 const initialState = {
     cartItems: [],
+    cartId: null,  // Agregado para almacenar el cartId
     isLoading: false,
     error: null
 };
@@ -27,8 +28,20 @@ export const fetchCartItems = createAsyncThunk(
     "cart/fetchCartItems",
     async (userId, { rejectWithValue }) => {
         try {
+            // Hacemos la solicitud GET al backend
             const response = await axios.get(`${API_BASE_URL}/get/${userId}`);
-            return response.data.data; // Asegurar que accede a la clave `data`
+            console.log(response.data, "revisión del slice");  // Verifica la respuesta completa
+
+            // Aquí estamos desestructurando la respuesta para extraer cartId y los items
+            const { cartId, data: items } = response.data;
+
+            // Verifica que cartId está siendo correctamente desestructurado
+            console.log("Cart ID desde la respuesta:", cartId);  // Debería mostrar el cartId correctamente
+            console.log("Items:", items);    // Verifica que los items están presentes
+
+            // Retornamos el cartId y los items de forma adecuada
+            return { cartId, items }; // Asegúrate de que se retorne correctamente el cartId
+
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || "Error al obtener el carrito");
         }
@@ -87,8 +100,16 @@ const shoppingCartSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchCartItems.fulfilled, (state, action) => {
+                const { cartId, items } = action.payload;
                 state.isLoading = false;
-                state.cartItems = action.payload;
+
+                // Verifica que cartId y items se han recibido correctamente
+                console.log("Cart ID desde el reducer:", cartId);
+                console.log("Items desde el reducer:", items);
+
+                state.isLoading = false;
+                state.cartItems = items;  // Guarda solo los items
+                state.cartId = cartId;   // Guarda el cartId
             })
             .addCase(fetchCartItems.rejected, (state, action) => {
                 state.isLoading = false;

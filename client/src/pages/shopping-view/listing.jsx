@@ -41,7 +41,7 @@ function ShoppingListing() {
     }, [dispatch, sort, filters]);
 
     const categorySearchParam = searchParams.get('category');
-    console.log(productList, "LISTA");
+    console.log(productList, "Lista de productos");
 
     function handleSort(value) {
         setSort(value);
@@ -70,6 +70,24 @@ function ShoppingListing() {
         dispatch(fetchProductDetails(getCurrentProductId));
     }
 
+    // function handleAddtoCart(getCurrentProductId) {
+    //     dispatch(
+    //         addToCart({
+    //             userId: user?.id,
+    //             productId: getCurrentProductId,
+    //             quantity: 1
+    //         })
+    //     ).then((data) => {
+    //         if (data?.payload?.success) {
+    //             dispatch(fetchCartItems(user?.id));
+    //             toast({
+    //                 title: 'Product is added to cart',
+    //             });
+    //         }
+    //     });
+    // }
+
+
     function handleAddtoCart(getCurrentProductId) {
         dispatch(
             addToCart({
@@ -79,13 +97,14 @@ function ShoppingListing() {
             })
         ).then((data) => {
             if (data?.payload?.success) {
-                dispatch(fetchCartItems(user?.id));
+                dispatch(fetchCartItems(user?.id)); // Esto debe obtener los productos del carrito, incluyendo cartId
                 toast({
                     title: 'Product is added to cart',
                 });
             }
         });
     }
+    
 
     useEffect(() => {
         if (productDetails !== null) setOpenDetailsDialog(true);

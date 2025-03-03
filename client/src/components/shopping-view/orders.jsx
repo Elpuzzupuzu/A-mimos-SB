@@ -24,7 +24,7 @@ function ShoppingOrders() {
 
   const { user } = useSelector((state) => state.auth);
   const { orderList, orderDetails } = useSelector((state) => state.shopOrder);
-  console.log(orderList, "direcciones");
+  console.log(orderList, "ORDER LIST");
   
 
   function handleFetchOrderDetails(getId) {

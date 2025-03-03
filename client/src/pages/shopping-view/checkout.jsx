@@ -3,18 +3,35 @@ import img from '../../assets/checkbanner.jpg';
 import { useDispatch, useSelector } from 'react-redux';
 import UserCartItemstContent from '@/components/shopping-view/cart-items-content';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createNewOrder } from '@/store/shop/order-slice';
 import { useToast } from '@/hooks/use-toast';
 
 function ShoppingCheckout() {
-    const { cartItems } = useSelector(state => state.shopCart);
+    // const { cartItems } = useSelector(state => state.shopCart);
     const { user } = useSelector((state) => state.auth);
     const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
     const { approvalURL } = useSelector(state => state.shopOrder);
     const [isPaymentStart, setIsPaymentStart] = useState(false);
     const dispatch = useDispatch();
     const { toast } = useToast();
+    
+
+    const { cartId } = useSelector(state => state.shopCart);  // Accede solo a cartId
+    const { cartItems } = useSelector(state => state.shopCart);  // Accede solo a cartItems
+    
+    // Logs para verificar los valores
+    console.log("Cart ID:", cartId);  // Esto debería mostrar el cartId
+    console.log("Cart Items:", cartItems);  // Esto debería mostrar los productos en el carrito (o los datos de cartItems)
+    
+
+
+
+
+
+    console.log(cartItems ,"PRUBAS DEL CHECK");
+   
+
 
     // Calcular el total del carrito
     const totalCartAmount = cartItems && cartItems.items && cartItems.items.length > 0
@@ -42,7 +59,7 @@ function ShoppingCheckout() {
 
         const orderData = {
             userId: user?.id,
-            cartId: cartItems?._id,
+            cartId: cartId?.cartId,
             cartItems: cartItems.items.map(singleCartItem => ({
                 productId: singleCartItem?.id,
                 title: singleCartItem?.title,
@@ -51,7 +68,7 @@ function ShoppingCheckout() {
                 quantity: singleCartItem?.quantity
             })),
             addressInfo: {
-                addressId: currentSelectedAddress?._id,
+                addressId: currentSelectedAddress?.id,
                 address: currentSelectedAddress?.address,
                 city: currentSelectedAddress?.city,
                 pincode: currentSelectedAddress?.pincode,
@@ -69,7 +86,8 @@ function ShoppingCheckout() {
         };
 
         console.log(orderData, "Payment Data");
-        
+
+
         dispatch(createNewOrder(orderData)).then((data) => {
             if (data?.payload?.success) {
                 setIsPaymentStart(true);
@@ -82,6 +100,11 @@ function ShoppingCheckout() {
     if (approvalURL) {
         window.location.href = approvalURL;
     }
+
+
+
+
+    
 
     return (
         <div className="flex flex-col">
