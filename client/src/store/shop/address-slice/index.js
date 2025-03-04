@@ -59,7 +59,7 @@ const addressSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(addNewAddress.fulfilled, (state, action) => {
-        console.log('Datos recibidos:', action.payload); // Verifica si los datos son los esperados
+        // console.log('Datos recibidos:', action.payload); // Verifica si los datos son los esperados
         state.isLoading = false;
         state.addressList.push(action.payload); // Añadir la nueva dirección a la lista
       })

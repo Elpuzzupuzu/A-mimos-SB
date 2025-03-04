@@ -30,7 +30,7 @@ const addAddress = async (req, res) => {
             throw error;
         }
 
-        console.log("Dirección insertada exitosamente:", data); // Verificar los datos insertados
+        // console.log("Dirección insertada exitosamente:", data); // Verificar los datos insertados
 
         res.status(201).json({
             success: true,
@@ -51,7 +51,7 @@ const fetchAllAddress = async (req, res) => {
     try {
         const { userId } = req.params;
         
-        console.log("User ID recibido:", userId); // Solo una vez
+        // console.log("User ID recibido:", userId); // Solo una vez
         
         if (!userId) {
             return res.status(400).json({

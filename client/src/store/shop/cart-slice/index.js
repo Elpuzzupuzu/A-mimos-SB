@@ -10,6 +10,20 @@ const initialState = {
     error: null
 };
 
+// **Obtener el cartId**
+export const fetchCartId = createAsyncThunk(
+    "cart/fetchCartId",
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/cart-id/${userId}`);
+            console.log("Cart ID:", response.data.cartId);  // Verifica el cartId obtenido
+            return { cartId: response.data.cartId }; // Retorna solo el cartId
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || "Error al obtener el cartId");
+        }
+    }
+);
+
 // **Agregar producto al carrito**
 export const addToCart = createAsyncThunk(
     "cart/addToCart",
@@ -28,19 +42,15 @@ export const fetchCartItems = createAsyncThunk(
     "cart/fetchCartItems",
     async (userId, { rejectWithValue }) => {
         try {
-            // Hacemos la solicitud GET al backend
             const response = await axios.get(`${API_BASE_URL}/get/${userId}`);
-            console.log(response.data, "revisión del slice");  // Verifica la respuesta completa
+            // console.log(response.data, "revisión del slice");
 
-            // Aquí estamos desestructurando la respuesta para extraer cartId y los items
             const { cartId, data: items } = response.data;
 
-            // Verifica que cartId está siendo correctamente desestructurado
-            console.log("Cart ID desde la respuesta:", cartId);  // Debería mostrar el cartId correctamente
-            console.log("Items:", items);    // Verifica que los items están presentes
+            // console.log("Cart ID desde la respuesta:", cartId);
+            // console.log("Items:", items);
 
-            // Retornamos el cartId y los items de forma adecuada
-            return { cartId, items }; // Asegúrate de que se retorne correctamente el cartId
+            return { cartId, items };
 
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || "Error al obtener el carrito");
@@ -80,6 +90,21 @@ const shoppingCartSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // **Obtener el cartId**
+            .addCase(fetchCartId.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchCartId.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.cartId = action.payload.cartId; // Almacena el cartId
+                // console.log("Cart ID almacenado en el estado:", action.payload.cartId);
+            })
+            .addCase(fetchCartId.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+
             // **Agregar producto al carrito**
             .addCase(addToCart.pending, (state) => {
                 state.isLoading = true;
@@ -101,12 +126,6 @@ const shoppingCartSlice = createSlice({
             })
             .addCase(fetchCartItems.fulfilled, (state, action) => {
                 const { cartId, items } = action.payload;
-                state.isLoading = false;
-
-                // Verifica que cartId y items se han recibido correctamente
-                console.log("Cart ID desde el reducer:", cartId);
-                console.log("Items desde el reducer:", items);
-
                 state.isLoading = false;
                 state.cartItems = items;  // Guarda solo los items
                 state.cartId = cartId;   // Guarda el cartId

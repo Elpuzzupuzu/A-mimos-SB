@@ -338,11 +338,52 @@ const deleteCartItem = async (req, res) => {
 };
 
 
+////
+
+
+// Obtener el id del carrito por userId
+const getCartId = async (req, res) => {
+    const userId = req.params.userId;  // Extraemos el userId de la URL
+    console.log("Received userId:", userId);  // Log para verificar el userId
+
+    try {
+        const { data: cart, error: cartError } = await supabase
+            .from('carts')
+            .select('id')
+            .eq('user_id', userId)
+            .single();
+
+        if (cartError || !cart) {
+            console.log("Cart not found for user:", userId);  // Log cuando no se encuentra el carrito
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found"
+            });
+        }
+
+        console.log("Found cart ID:", cart.id);  // Log cuando se encuentra el carrito
+        return res.status(200).json({
+            success: true,
+            cartId: cart.id
+        });
+    } catch (error) {
+        console.error("Error fetching cart ID:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred"
+        });
+    }
+};
+
+
+
 // Otras funciones (fetchCartItems, updateCartQuantity, deleteCartItem) también deben actualizarse de manera similar
 
 module.exports = {
     addToCart,
     fetchCartItems,
     updateCartQuantity,
-    deleteCartItem
+    deleteCartItem,
+    getCartId,
+    
 };
