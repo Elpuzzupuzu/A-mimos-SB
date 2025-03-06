@@ -131,12 +131,16 @@ const createOrder = async (req, res) => {
 
 
 
+// Obtener todas las órdenes de un usuario
+
+
+
 // const capturePayment = async (req, res) => {
 //     try {
 //         const { paymentId, PayerID, orderId } = req.query;  // PayPal envía estos datos en la URL
 
 //         // Verificar si los datos esenciales existen
-//         console.log("🔹 Recibido en capturePayment:", { paymentId, PayerID, orderId });
+//         console.log("Recibido en capturePayment:", { paymentId, PayerID, orderId });
 
 //         if (!paymentId || !PayerID || !orderId) {
 //             return res.status(400).json({
@@ -153,19 +157,19 @@ const createOrder = async (req, res) => {
 //             .single(); 
 
 //         if (orderError || !order) {
-//             console.error("❌ Error al obtener la orden:", orderError);
+//             console.error("Error al obtener la orden:", orderError);
 //             return res.status(404).json({
 //                 success: false,
 //                 message: "Order not found"
 //             });
 //         }
 
-//         console.log("✅ Orden encontrada:", order);
+//         console.log("Orden encontrada:", order);
 
 //         // Ejecutar el pago con PayPal
 //         paypal.payment.execute(paymentId, { payer_id: PayerID }, async (error, payment) => {
 //             if (error) {
-//                 console.error('❌ Error al ejecutar pago en PayPal:', error);
+//                 console.error('Error al ejecutar pago en PayPal:', error);
 //                 return res.status(500).json({
 //                     success: false,
 //                     message: 'PayPal execution failed'
@@ -187,56 +191,48 @@ const createOrder = async (req, res) => {
 //                 .single();
 
 //             if (updateError) {
-//                 console.error('❌ Error al actualizar la orden:', updateError);
+//                 console.error('Error al actualizar la orden:', updateError);
 //                 return res.status(500).json({
 //                     success: false,
 //                     message: 'Error updating order payment'
 //                 });
 //             }
 
-//             console.log("✅ Orden actualizada correctamente:", updatedOrder);
+//             console.log("Orden actualizada correctamente:", updatedOrder);
 
-//             // Vaciar el carrito en lugar de eliminarlo
+//             // Eliminar todos los elementos de la tabla cart_items donde cartId sea igual al recibido
 //             if (order.cartId) {
-//                 const { error: cartError } = await supabase
-//                     .from('cart')
-//                     .update({
-//                         cartItems: JSON.stringify([]),  // Vaciar los productos del carrito
-//                         status: 'processed'  // Marcamos el carrito como procesado
-//                     })
-//                     .eq('id', order.cartId);
+//                 const { error: cartItemsError } = await supabase
+//                     .from('cart_items')
+//                     .delete()
+//                     .eq('cart_id', order.cartId);
 
-//                 if (cartError) {
-//                     console.warn(`⚠️ Error al vaciar carrito ID ${order.cartId}:`, cartError);
+//                 if (cartItemsError) {
+//                     console.warn(`Error al eliminar items del carrito ID ${order.cartId}:`, cartItemsError);
 //                 } else {
-//                     console.log(`🗑️ Carrito ID ${order.cartId} vaciado.`);
+//                     console.log(`Items del carrito ID ${order.cartId} eliminados.`);
 //                 }
 //             } else {
-//                 console.warn('⚠️ El pedido no tiene un cartId asociado.');
+//                 console.warn('El pedido no tiene un cartId asociado.');
 //             }
 
 //             return res.status(200).json({
 //                 success: true,
-//                 message: 'Order confirmed and cart emptied',
-//                 data: updatedOrder
+//                 message: 'Order confirmed and cart items deleted',
+//                 data: updatedOrder,
+//                 redirectURL: "http://localhost:5173/shop/payment-success",  // Asegúrate de enviar esta URL correctamente
+
 //             });
 //         });
 
 //     } catch (error) {
-//         console.error('❌ Error en capturePayment:', error);
+//         console.error('Error en capturePayment:', error);
 //         return res.status(500).json({
 //             success: false,
 //             message: 'An error occurred'
 //         });
 //     }
 // };
-
-
-
-
-// Obtener todas las órdenes de un usuario
-
-
 
 const capturePayment = async (req, res) => {
     try {
@@ -319,10 +315,15 @@ const capturePayment = async (req, res) => {
                 console.warn('El pedido no tiene un cartId asociado.');
             }
 
+            // Redirigir a la página de éxito
+            const redirectURL = "http://localhost:5173/shop/payment-success";  // Aquí se define la URL de redirección
+
+            // Asegúrate de que el redirectURL esté presente en la respuesta
             return res.status(200).json({
                 success: true,
                 message: 'Order confirmed and cart items deleted',
-                data: updatedOrder
+                data: updatedOrder,
+                redirectURL,  // Asegúrate de incluir redirectURL aquí
             });
         });
 
@@ -334,6 +335,12 @@ const capturePayment = async (req, res) => {
         });
     }
 };
+
+
+
+
+
+
 
 
 

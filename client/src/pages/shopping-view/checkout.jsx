@@ -1,4 +1,3 @@
-
 import Address from '@/components/shopping-view/address';
 import img from '../../assets/checkbanner.jpg';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,7 +12,7 @@ function ShoppingCheckout() {
     const { cartItems } = useSelector(state => state.shopCart);
     const { user } = useSelector((state) => state.auth);
     const [currentSelectedAddress, setCurrentSelectedAddress] = useState(null);
-    const { approvalURL } = useSelector(state => state.shopOrder); // Asegúrate de que approvalURL esté bien mapeado desde el estado
+    const { approvalURL } = useSelector(state => state.shopOrder);  // Asegúrate de que approvalURL esté bien mapeado desde el estado
     const [isPaymentStart, setIsPaymentStart] = useState(false);
     const dispatch = useDispatch();
     const { toast } = useToast();
@@ -24,7 +23,7 @@ function ShoppingCheckout() {
         if (user?.id && !cartId) {
             dispatch(fetchCartId(user.id)); // Despachar solo si cartId no está disponible
         }
-    }, [dispatch, user?.id, cartId]);  // Dependencias: user.id y cartId
+    }, [dispatch, user?.id, cartId]);
 
     // Calcular el total del carrito
     const totalCartAmount = cartItems?.items?.length > 0 
@@ -50,7 +49,7 @@ function ShoppingCheckout() {
             });
             return;
         }
-    
+
         if (currentSelectedAddress === null) {
             toast({
                 title: 'Please select one address to proceed',
@@ -58,9 +57,9 @@ function ShoppingCheckout() {
             });
             return;
         }
-    
+
         setIsPaymentStart(true);
-    
+
         const orderData = {
             userId: user?.id,
             cartId: cartId,
@@ -91,20 +90,50 @@ function ShoppingCheckout() {
 
         // Dispatch de la acción para crear una nueva orden
         dispatch(createNewOrder(orderData)).then((data) => {
+            console.log("Respuesta del backend:", data);  // Verifica que la respuesta es correcta
+
             if (data?.payload?.success) {
                 setIsPaymentStart(true);  // Se inicia el pago si la orden es creada exitosamente
+
+                // Verificar que `approvalURL` esté presente
+                const approvalURL = data?.payload?.approvalURL;
+                console.log("approvalURL:", approvalURL);  // Asegúrate de que esta URL esté presente
+
+                if (approvalURL) {
+                    // Redirigir al usuario a la URL de PayPal
+                    window.location.href = approvalURL;  
+                } else {
+                    console.error("Approval URL is undefined");
+                    toast({
+                        title: "Error: No approval URL found",
+                        variant: "destructive"
+                    });
+                }
             } else {
                 setIsPaymentStart(false);
             }
         });
     }
 
-    // Redirigir a PayPal si la URL de aprobación está disponible
+    // Redirigir a PayPal si approvalURL está presente
     useEffect(() => {
         if (approvalURL) {
             window.location.href = approvalURL;  // Redirige al usuario a la URL de PayPal
         }
     }, [approvalURL]);
+
+    // Agrega redirección tras el éxito del pago
+    useEffect(() => {
+        if (isPaymentStart) {
+            // Esperar a que se complete el pago, y luego redirigir a la página principal
+            setTimeout(() => {
+                // Verifica si el carrito se ha vaciado (indicación de pago exitoso)
+                if (cartItems?.items?.length === 0) {
+                    window.location.href = "http://localhost:5173/shop/home";  // Redirige a la página de inicio
+                }
+            }, 3000);  // Retardo para dar tiempo a la redirección de PayPal
+        }
+    }, [isPaymentStart, cartItems]);
 
     return (
         <div className="flex flex-col">
@@ -156,8 +185,6 @@ function ShoppingCheckout() {
 }
 
 export default ShoppingCheckout;
-
-
 
 
 
