@@ -47,9 +47,6 @@ export const fetchCartItems = createAsyncThunk(
 
             const { cartId, data: items } = response.data;
 
-            // console.log("Cart ID desde la respuesta:", cartId);
-            // console.log("Items:", items);
-
             return { cartId, items };
 
         } catch (error) {

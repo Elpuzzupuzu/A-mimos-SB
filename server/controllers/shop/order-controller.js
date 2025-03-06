@@ -1,29 +1,21 @@
-const supabase = require('../../config/supabase');
 
+
+const supabase = require('../../config/supabase');
+const paypal = require('../../helpers/paypal');  // Importar PayPal
+
+// 🔹 Crear una orden y generar `approvalURL` de PayPal
 const createOrder = async (req, res) => {
     try {
         console.log('🔹 Request Body:', req.body);
 
         const {
-            userId,
-            cartItems,
-            addressInfo,
-            orderStatus,
-            paymentMethods,
-            paymentStatus,
-            totalAmount,
-            orderDate,
-            orderUpdate,
-            paymentId,
-            payerId,
-            cartId
+            userId, cartItems, addressInfo, orderStatus, paymentMethods,
+            paymentStatus, totalAmount, orderDate, orderUpdate, cartId
         } = req.body;
 
-        // console.log('✅ userId:', userId);
-        // console.log('✅ cartId:', cartId);
-        // console.log('✅ cartItems:', cartItems);
-
-        // Validaciones básicas
+        // Verificar que cartId y userId estén presentes
+        console.log("📦 Datos recibidos:", { userId, cartId });
+        
         if (!userId || !cartId) {
             return res.status(400).json({
                 success: false,
@@ -41,7 +33,6 @@ const createOrder = async (req, res) => {
         // Verificar que cada cartItem tenga productId
         for (let i = 0; i < cartItems.length; i++) {
             const item = cartItems[i];
-            // console.log(`🔹 Item ${i}:`, item);
             if (!item.productId) {
                 return res.status(400).json({
                     success: false,
@@ -50,35 +41,33 @@ const createOrder = async (req, res) => {
             }
         }
 
-        // Insertar orden en Supabase y asegurar que devuelve la orden insertada
-        const { data: order, error } = await supabase
+        // Insertar la orden en Supabase
+        const { data: order, error: orderError } = await supabase
             .from('orders')
-            .insert([
-                {
-                    userId,
-                    cartId,
-                    cartItems: JSON.stringify(cartItems),
-                    addressInfo: JSON.stringify(addressInfo),
-                    orderStatus,
-                    paymentMethods,
-                    paymentStatus,
-                    totalAmount,
-                    orderDate,
-                    orderUpdate,
-                    paymentId,
-                    payerId
-                }
-            ])
+            .insert([{
+                userId,
+                cartId,  // Aseguramos que cartId se está enviando correctamente
+                cartItems: JSON.stringify(cartItems),
+                addressInfo: JSON.stringify(addressInfo),
+                orderStatus,
+                paymentMethods,
+                paymentStatus,
+                totalAmount,
+                orderDate,
+                orderUpdate,
+                paymentId: '',
+                payerId: ''
+            }])
             .select() // 🔥 Asegura que devuelve la orden insertada
-            .single(); // Solo queremos un objeto, no un array
+            .single();  // Solo queremos un objeto, no un array
 
-        // Verificar si ocurrió un error en Supabase
-        if (error) {
-            console.error('❌ Error al insertar la orden en Supabase:', error);
+        // Verificar si ocurrió un error al insertar la orden
+        if (orderError) {
+            console.error('❌ Error al insertar la orden en Supabase:', orderError);
             return res.status(500).json({
                 success: false,
                 message: 'Error al guardar la orden en la base de datos',
-                error: error.message
+                error: orderError.message
             });
         }
 
@@ -93,181 +82,261 @@ const createOrder = async (req, res) => {
 
         console.log('✅ Orden insertada correctamente:', order);
 
-        // Simulación de aprobación de PayPal
-        const approvalURL = "https://www.paypal.com/approve-order";
+        // Crear un pago con PayPal
+        const paymentPayload = {
+            intent: 'sale',
+            payer: { payment_method: 'paypal' },
+            redirect_urls: {
+                return_url: `http://localhost:5000/api/shop/orders/capture?orderId=${order.id}`,
+                cancel_url: 'http://localhost:5000/cancel'
+            },
+            transactions: [{
+                amount: {
+                    total: totalAmount.toFixed(2),  // Total en formato correcto
+                    currency: 'USD'
+                },
+                description: 'Compra en Mimittos Shop'
+            }]
+        };
 
-        return res.status(201).json({
-            success: true,
-            approvalURL,
-            orderId: order.id
+        paypal.payment.create(paymentPayload, async (error, payment) => {
+            if (error) {
+                console.error('❌ Error al crear pago en PayPal:', error);
+                return res.status(500).json({ success: false, message: 'Error creating PayPal payment' });
+            }
+
+            // Buscar el enlace de aprobación
+            const approvalURL = payment.links.find(link => link.rel === 'approval_url')?.href;
+
+            if (!approvalURL) {
+                return res.status(500).json({ success: false, message: 'Approval URL not found' });
+            }
+
+            // Devolver la URL de aprobación de PayPal
+            res.status(201).json({
+                success: true,
+                approvalURL,  // Esta es la URL para redirigir al usuario a PayPal
+                orderId: order.id
+            });
         });
 
     } catch (error) {
         console.error('❌ Error en createOrder:', error);
-        if (!res.headersSent) {
-            return res.status(500).json({
-                success: false,
-                message: 'Error occurred while creating order'
-            });
-        }
+        res.status(500).json({
+            success: false,
+            message: 'Error occurred while creating order'
+        });
     }
 };
 
 
 
-// Confirmar pago de la orden
 // const capturePayment = async (req, res) => {
 //     try {
-//         const { paymentId, payerId, orderId } = req.body;
+//         const { paymentId, PayerID, orderId } = req.query;  // PayPal envía estos datos en la URL
 
-//         // Obtener la orden de Supabase
-//         const { data: order, error } = await supabase
-//             .from('orders')
-//             .select('*')
-//             .eq('id', orderId)
-//             .single(); // Solo una orden
+//         // Verificar si los datos esenciales existen
+//         console.log("🔹 Recibido en capturePayment:", { paymentId, PayerID, orderId });
 
-//         if (error || !order) {
-//             return res.status(404).json({
+//         if (!paymentId || !PayerID || !orderId) {
+//             return res.status(400).json({
 //                 success: false,
-//                 message: 'Order cannot be found'
+//                 message: "Missing paymentId, PayerID, or orderId"
 //             });
 //         }
 
-//         // Actualizar la orden con el estado de pago
-//         const { data: updatedOrder, error: updateError } = await supabase
+//         // Obtener la orden de Supabase
+//         const { data: order, error: orderError } = await supabase
 //             .from('orders')
-//             .update({
-//                 paymentStatus: 'paid',
-//                 orderStatus: 'confirmed',
-//                 paymentId,
-//                 payerId
-//             })
+//             .select('*')
 //             .eq('id', orderId)
-//             .single(); // Solo una orden actualizada
+//             .single(); 
 
-//         if (updateError) {
-//             throw updateError;
+//         if (orderError || !order) {
+//             console.error("❌ Error al obtener la orden:", orderError);
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Order not found"
+//             });
 //         }
 
-//         // Verificar que el carrito esté asociado antes de eliminarlo
-//         if (order.cartId) {
-//             const { data: cart, error: cartError } = await supabase
-//                 .from('carts')
-//                 .delete()
-//                 .eq('id', order.cartId)
+//         console.log("✅ Orden encontrada:", order);
+
+//         // Ejecutar el pago con PayPal
+//         paypal.payment.execute(paymentId, { payer_id: PayerID }, async (error, payment) => {
+//             if (error) {
+//                 console.error('❌ Error al ejecutar pago en PayPal:', error);
+//                 return res.status(500).json({
+//                     success: false,
+//                     message: 'PayPal execution failed'
+//                 });
+//             }
+
+//             // Actualizar la orden con el estado de pago y asegurarse de que cartId no se pierda
+//             const { data: updatedOrder, error: updateError } = await supabase
+//                 .from('orders')
+//                 .update({
+//                     paymentStatus: 'paid',
+//                     orderStatus: 'confirmed',
+//                     paymentId,
+//                     payerId: PayerID,
+//                     cartId: order.cartId  // Asegurarse que cartId no se pierda
+//                 })
+//                 .eq('id', orderId)
+//                 .select()
 //                 .single();
 
-//             if (cartError) {
-//                 console.warn(`El carrito con ID ${order.cartId} no existe o ya fue eliminado.`);
+//             if (updateError) {
+//                 console.error('❌ Error al actualizar la orden:', updateError);
+//                 return res.status(500).json({
+//                     success: false,
+//                     message: 'Error updating order payment'
+//                 });
 //             }
-//         } else {
-//             console.warn("El pedido no tiene un CartId asociado.");
-//         }
 
-//         res.status(200).json({
-//             success: true,
-//             message: 'Order confirmed and cart deleted',
-//             data: updatedOrder
+//             console.log("✅ Orden actualizada correctamente:", updatedOrder);
+
+//             // Vaciar el carrito en lugar de eliminarlo
+//             if (order.cartId) {
+//                 const { error: cartError } = await supabase
+//                     .from('cart')
+//                     .update({
+//                         cartItems: JSON.stringify([]),  // Vaciar los productos del carrito
+//                         status: 'processed'  // Marcamos el carrito como procesado
+//                     })
+//                     .eq('id', order.cartId);
+
+//                 if (cartError) {
+//                     console.warn(`⚠️ Error al vaciar carrito ID ${order.cartId}:`, cartError);
+//                 } else {
+//                     console.log(`🗑️ Carrito ID ${order.cartId} vaciado.`);
+//                 }
+//             } else {
+//                 console.warn('⚠️ El pedido no tiene un cartId asociado.');
+//             }
+
+//             return res.status(200).json({
+//                 success: true,
+//                 message: 'Order confirmed and cart emptied',
+//                 data: updatedOrder
+//             });
 //         });
 
 //     } catch (error) {
-//         console.error("Error en capturePayment:", error);
-//         res.status(500).json({
+//         console.error('❌ Error en capturePayment:', error);
+//         return res.status(500).json({
 //             success: false,
-//             message: 'Some error occurred'
+//             message: 'An error occurred'
 //         });
 //     }
 // };
 
 
+
+
+// Obtener todas las órdenes de un usuario
+
+
+
 const capturePayment = async (req, res) => {
     try {
-        const { paymentId, payerId, orderId } = req.body;
-
-        console.log("🔹 Recibido en capturePayment:", { paymentId, payerId, orderId });
+        const { paymentId, PayerID, orderId } = req.query;  // PayPal envía estos datos en la URL
 
         // Verificar si los datos esenciales existen
-        if (!paymentId || !payerId || !orderId) {
+        console.log("Recibido en capturePayment:", { paymentId, PayerID, orderId });
+
+        if (!paymentId || !PayerID || !orderId) {
             return res.status(400).json({
                 success: false,
-                message: "Missing paymentId, payerId, or orderId"
+                message: "Missing paymentId, PayerID, or orderId"
             });
         }
 
         // Obtener la orden de Supabase
         const { data: order, error: orderError } = await supabase
-            .from("orders")
-            .select("*")
-            .eq("id", orderId)
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
             .single(); 
 
         if (orderError || !order) {
-            console.error("❌ Error al obtener la orden:", orderError);
+            console.error("Error al obtener la orden:", orderError);
             return res.status(404).json({
                 success: false,
                 message: "Order not found"
             });
         }
 
-        console.log("✅ Orden encontrada:", order);
+        console.log("Orden encontrada:", order);
 
-        // Actualizar la orden con el estado de pago
-        const { data: updatedOrder, error: updateError } = await supabase
-            .from("orders")
-            .update({
-                paymentStatus: "paid",
-                orderStatus: "confirmed",
-                paymentId,
-                payerId
-            })
-            .eq("id", orderId)
-            .select() // 🔥 Asegurar que devuelve la orden actualizada
-            .single(); 
-
-        if (updateError) {
-            console.error("❌ Error al actualizar la orden:", updateError);
-            return res.status(500).json({
-                success: false,
-                message: "Error updating order payment"
-            });
-        }
-
-        console.log("✅ Orden actualizada correctamente:", updatedOrder);
-
-        // Verificar que el carrito esté asociado antes de eliminarlo
-        if (order.cartId) {
-            const { error: cartError } = await supabase
-                .from("carts")
-                .delete()
-                .eq("id", order.cartId);
-
-            if (cartError) {
-                console.warn(`⚠️ Error al eliminar carrito ID ${order.cartId}:`, cartError);
-            } else {
-                console.log(`🗑️ Carrito ID ${order.cartId} eliminado.`);
+        // Ejecutar el pago con PayPal
+        paypal.payment.execute(paymentId, { payer_id: PayerID }, async (error, payment) => {
+            if (error) {
+                console.error('Error al ejecutar pago en PayPal:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'PayPal execution failed'
+                });
             }
-        } else {
-            console.warn("⚠️ El pedido no tiene un cartId asociado.");
-        }
 
-        return res.status(200).json({
-            success: true,
-            message: "Order confirmed and cart deleted",
-            data: updatedOrder
+            // Actualizar la orden con el estado de pago y asegurarse de que cartId no se pierda
+            const { data: updatedOrder, error: updateError } = await supabase
+                .from('orders')
+                .update({
+                    paymentStatus: 'paid',
+                    orderStatus: 'confirmed',
+                    paymentId,
+                    payerId: PayerID,
+                    cartId: order.cartId  // Asegurarse que cartId no se pierda
+                })
+                .eq('id', orderId)
+                .select()
+                .single();
+
+            if (updateError) {
+                console.error('Error al actualizar la orden:', updateError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error updating order payment'
+                });
+            }
+
+            console.log("Orden actualizada correctamente:", updatedOrder);
+
+            // Eliminar todos los elementos de la tabla cart_items donde cartId sea igual al recibido
+            if (order.cartId) {
+                const { error: cartItemsError } = await supabase
+                    .from('cart_items')
+                    .delete()
+                    .eq('cart_id', order.cartId);
+
+                if (cartItemsError) {
+                    console.warn(`Error al eliminar items del carrito ID ${order.cartId}:`, cartItemsError);
+                } else {
+                    console.log(`Items del carrito ID ${order.cartId} eliminados.`);
+                }
+            } else {
+                console.warn('El pedido no tiene un cartId asociado.');
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Order confirmed and cart items deleted',
+                data: updatedOrder
+            });
         });
 
     } catch (error) {
-        console.error("❌ Error en capturePayment:", error);
+        console.error('Error en capturePayment:', error);
         return res.status(500).json({
             success: false,
-            message: "An error occurred"
+            message: 'An error occurred'
         });
     }
 };
 
 
-// Obtener todas las órdenes de un usuario
+
 const getAllOrdersByUser = async (req, res) => {
     try {
         const { userId } = req.params;
