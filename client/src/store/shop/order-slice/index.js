@@ -7,6 +7,7 @@ const initialState = {
     orderId: null,
     orderList: [],
     orderDetails: null,
+    redirectURL: null,  // Nuevo campo para almacenar la URL de redirección
 };
 
 export const createNewOrder = createAsyncThunk(
@@ -97,6 +98,24 @@ const shoppingOrderSlice = createSlice({
             .addCase(getOrderDetails.rejected, (state) => {
                 state.isLoading = false;
                 state.orderDetails = null;
+            })
+
+            // Captura del pago y redirección
+            .addCase(capturePayment.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(capturePayment.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Almacenamos la URL de redirección
+                state.redirectURL = action.payload.redirectURL;
+                // Redirigir al usuario, si es necesario
+                if (state.redirectURL) {
+                    window.location.href = state.redirectURL;  // Redirigir al frontend
+                }
+            })
+            .addCase(capturePayment.rejected, (state) => {
+                state.isLoading = false;
+                state.redirectURL = null;
             });
     }
 });

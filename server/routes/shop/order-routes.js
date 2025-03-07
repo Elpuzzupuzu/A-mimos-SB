@@ -5,7 +5,8 @@ const {createOrder,capturePayment,getAllOrdersByUser,getOrderDetails} = require 
 const router = express.Router();
 
 router.post('/create', createOrder);
-router.get('/capture', capturePayment);
+router.post('/capture', capturePayment);
+
 router.get('/list/:userId',getAllOrdersByUser);
 router.get('/details/:id',getOrderDetails);
 
