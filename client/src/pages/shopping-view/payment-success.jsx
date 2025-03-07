@@ -1,31 +1,24 @@
 import { useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function PaypalSuccessPage() {
-    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    
-    const paymentId = searchParams.get("paymentId");
-    const PayerID = searchParams.get("PayerID");
-    const orderId = searchParams.get("orderId"); 
 
     useEffect(() => {
-        if (paymentId && PayerID && orderId) {
-            // Hacer una petición al backend para confirmar el pago
-            fetch(`http://localhost:5000/api/shop/orders/capture?paymentId=${paymentId}&PayerID=${PayerID}&orderId=${orderId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Redirigir a la página de éxito después de confirmar el pago
-                        navigate(`/shop/order-success?orderId=${orderId}`);
-                    } else {
-                        // Redirigir a una página de error si el pago falla
-                        navigate("/shop/payment-failed");
-                    }
-                })
-                .catch(() => navigate("/shop/payment-failed"));
+        // Verifica si el pago fue procesado exitosamente al buscar el `orderId` en sessionStorage
+        const orderId = sessionStorage.getItem("currentOrderId");
+
+        if (orderId) {
+            // Si el `orderId` está presente en sessionStorage, significa que el pago fue procesado
+            // Redirige a la página de cuenta después de 2 segundos (opcional)
+            setTimeout(() => {
+                navigate("/shop/account"); // Redirigir a la página de cuenta
+            }, 2000); // 2 segundos de espera antes de redirigir
+        } else {
+            // Si no hay `orderId` en sessionStorage, redirigir a la página de error o fallo
+            navigate("/shop/payment-failed");
         }
-    }, [paymentId, PayerID, orderId, navigate]);
+    }, [navigate]);
 
     return (
         <div className="text-center p-10">
