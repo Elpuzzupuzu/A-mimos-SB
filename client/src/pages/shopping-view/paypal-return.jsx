@@ -1,65 +1,48 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { capturePayment } from "@/store/shop/order-slice";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-
-
-function PaypalReturnPage (){
-
-
-    const dispatch = useDispatch();
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const paymentId = params.get('paymentId');
-    const payerId = params.get('PayerID');
-
-    // useEffect(()=>{
-    //     if(paymentId && payerId){
-    //         const orderId = JSON.parse(sessionStorage.getItem('currentOrderId'));
-    //         dispatch(capturePayment({paymentId,payerId,orderId})).then( data =>{
-    //             if(data?.payload?.success){
-    //                 sessionStorage.removeItem('currentOrderId')
-    //                 window.location.href = '/shop/payment-success'
-
-    //             }
-    //         }
-    //         )
-    //     }
-
-    // },[paymentId,payerId,dispatch])
+function PaypalReturn() {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        console.log("Parametros obtenidos de la URL:");
-        console.log("paymentId:", paymentId);
-        console.log("payerId:", payerId);
-    
-        if (paymentId && payerId) {
-            const orderId = JSON.parse(sessionStorage.getItem('currentOrderId'));
-            console.log("orderId obtenido de sessionStorage:", orderId);
-    
-            dispatch(capturePayment({ paymentId, payerId, orderId })).then((data) => {
-                console.log("Respuesta de capturePayment:", data);
-    
-                if (data?.payload?.success) {
-                    sessionStorage.removeItem('currentOrderId');
-                    window.location.href = '/shop/payment-success';
+        const paymentId = searchParams.get("paymentId");
+        const payerId = searchParams.get("PayerID");
+        const orderId = searchParams.get("orderId");
+
+        console.log("\ud83d\udce9 Datos recibidos en PayPal Return:", { paymentId, payerId, orderId });
+
+        if (paymentId && payerId && orderId) {
+            fetch("http://localhost:5000/api/shop/orders/capture", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentId, payerId, orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("\ud83d\udce9 Respuesta del backend:", data);
+                if (data.success) {
+                    navigate("/shop/payment-success"); // \ud83d\udd39 Redirigir a éxito
+                } else {
+                    navigate("/shop/payment-failed"); // \ud83d\udd39 Redirigir a fallo
                 }
-            }).catch(error => console.error("Error en capturePayment:", error));
+            })
+            .catch(error => {
+                console.error("\u274c Error en fetch:", error);
+                navigate("/shop/payment-failed");
+            });
+        } else {
+            console.warn("\u26a0\ufe0f Faltan parámetros en la URL de PayPal.");
+            navigate("/shop/payment-failed");
         }
-    }, [paymentId, payerId, dispatch]);
-    
+    }, [searchParams, navigate]);
 
-
-    return(
-        <Card>
-            <CardHeader>
-                <CardTitle>processing payment...please wait</CardTitle>
-            </CardHeader>
-        </Card>
-    )
+    return (
+        <div className="flex flex-col items-center justify-center h-screen">
+            <h2 className="text-xl font-bold">Procesando pago...</h2>
+            <p>Por favor espera mientras confirmamos tu pago.</p>
+        </div>
+    );
 }
 
-
-export default PaypalReturnPage;
+export default PaypalReturn;

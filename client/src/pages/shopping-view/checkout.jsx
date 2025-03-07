@@ -98,28 +98,41 @@ function ShoppingCheckout() {
         });
     }
 
-    useEffect(() => {
-        const paymentId = searchParams.get("paymentId");
-        const payerId = searchParams.get("PayerID");
-        const orderId = searchParams.get("orderId");
+    // useEffect(() => {
+    //     // Capturamos los parámetros de la URL
+    //     const paymentId = searchParams.get("paymentId");
+    //     const payerId = searchParams.get("PayerID");
+    //     const orderId = searchParams.get("orderId");
+    
+    //     // Verificamos que los parámetros no sean null antes de continuar
+    //     if (paymentId && payerId && orderId) {
+    //         console.log("📩 Enviando datos al backend:", { paymentId, payerId, orderId });
+    
+    //         fetch("http://localhost:5000/api/shop/orders/capture", {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ paymentId, payerId, orderId })
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log("📩 Respuesta del backend:", data);
+    //             if (data.success) {
+    //                 navigate("/shop/payment-success");
+    //             } else {
+    //                 navigate("/shop/payment-failed");
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error("❌ Error en fetch:", error);
+    //             navigate("/shop/payment-failed");
+    //         });
+    //     } else {
+    //         console.error("Faltan parámetros en la URL:", { paymentId, payerId, orderId });
+    //     }
+    // }, [searchParams, navigate]);
+    
 
-        if (paymentId && payerId && orderId) {
-            fetch("http://localhost:5000/api/shop/orders/capture", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentId, payerId, orderId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    navigate("/shop/payment-success");
-                } else {
-                    navigate("/shop/payment-failed");
-                }
-            })
-            .catch(() => navigate("/shop/payment-failed"));
-        }
-    }, [searchParams, navigate]);
+    
 
     return (
         <div className="flex flex-col">
