@@ -42,6 +42,8 @@ export const getOrderDetails = createAsyncThunk(
     'order/getOrderDetails', 
     async (id) => {
         const response = await axios.get(`http://localhost:5000/api/shop/orders/details/${id}`);
+        console.log("Detalles de la orden:", response.data);
+
         return response.data;
     }
 );
@@ -93,8 +95,13 @@ const shoppingOrderSlice = createSlice({
             })
             .addCase(getOrderDetails.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.orderDetails = action.payload.data;
+                state.orderDetails = {
+                    ...action.payload.data,
+                    cartItems: JSON.parse(action.payload.data.cartItems), // Convertir a array
+                    addressInfo: JSON.parse(action.payload.data.addressInfo) // Convertir a objeto
+                };
             })
+            
             .addCase(getOrderDetails.rejected, (state) => {
                 state.isLoading = false;
                 state.orderDetails = null;

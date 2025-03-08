@@ -62,8 +62,8 @@ function ShoppingOrders() {
           <TableBody>
             {orderList && orderList.length > 0 ? (
               orderList.map((orderItem) => (
-                <TableRow key={orderItem?._id}>
-                  <TableCell>{orderItem?._id}</TableCell>
+                <TableRow key={orderItem?.id}>
+                  <TableCell>{orderItem?.id}</TableCell>
                   <TableCell>{orderItem?.orderDate.split("T")[0]}</TableCell>
                   <TableCell>
                     <Badge className={`${statusColors[orderItem?.orderStatus] || "bg-gray-300 text-black"}`}>
@@ -79,7 +79,7 @@ function ShoppingOrders() {
                         dispatch(resetOrderDetails());
                       }}
                     >
-                      <Button onClick={() => handleFetchOrderDetails(orderItem?._id)}>View Details</Button>
+                      <Button onClick={() => handleFetchOrderDetails(orderItem?.id)}>View Details</Button>
                       <ShoppingOrderDetailsView orderDetails={orderDetails} />
                     </Dialog>
                   </TableCell>

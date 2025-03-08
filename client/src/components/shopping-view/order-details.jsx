@@ -26,7 +26,7 @@ function ShoppingOrderDetailsView({ orderDetails }) {
         <div className="grid gap-2">
           <div className="flex mt-9 items-center justify-between">
             <p className="font-medium">Order ID</p>
-            <span className="text-gray-600">{orderDetails?._id}</span>
+            <span className="text-gray-600">{orderDetails?.id}</span>
           </div>
           <div className="flex mt-9 items-center justify-between">
             <p className="font-medium">Order date</p>
@@ -60,7 +60,7 @@ function ShoppingOrderDetailsView({ orderDetails }) {
             <ul className="grid gap-3">
               {orderDetails?.cartItems && orderDetails?.cartItems.length > 0
                 ? orderDetails?.cartItems.map((item) => (
-                    <li key={item._id} className="flex items-center justify-between">
+                    <li key={item.id} className="flex items-center justify-between">
                       <span>Product: {item.title}</span>
                       <span>Quantity: {item.quantity}</span>
                       <span>Price: ${item.price}</span>
