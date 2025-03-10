@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 // 🔹 Middlewares
 app.use(
   cors({
-    origin: "https://tu-frontend.onrender.com",
+    origin: "https://a-mimos-sb.onrender.com",
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
