@@ -65,8 +65,8 @@ const createOrder = async (req, res) => {
             intent: 'sale',
             payer: { payment_method: 'paypal' },
             redirect_urls: {
-                return_url: `http://localhost:5173/shop/paypal-return?orderId=${order.id}`,
-                cancel_url: 'http://localhost:5173/shop/payment-cancel'
+                return_url: `http://localhost:5000/shop/paypal-return?orderId=${order.id}`,
+                cancel_url: 'http://localhost:5000/shop/payment-cancel'
             },
             transactions: [{
                 amount: {
@@ -76,6 +76,7 @@ const createOrder = async (req, res) => {
                 description: 'Compra en Mimittos Shop'
             }]
         };
+        
 
         paypal.payment.create(paymentPayload, async (error, payment) => {
             if (error) {

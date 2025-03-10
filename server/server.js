@@ -1,9 +1,10 @@
-require("dotenv").config(); // Cargar variables de entorno
+require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const path = require("path");
 
-// 🔹 Importar Supabase desde el archivo separado
+// 🔹 Importar Supabase
 const supabase = require("./config/supabase");
 
 // 🔹 Importar rutas
@@ -11,7 +12,7 @@ const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
-const shopAddressRouter = require("./routes/shop/address-routes"); // Corrección de typo
+const shopAddressRouter = require("./routes/shop/address-routes");
 const shopOrderRouter = require("./routes/shop/order-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
 
@@ -21,16 +22,16 @@ const PORT = process.env.PORT || 5000;
 // 🔹 Middlewares
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://tu-frontend.onrender.com",
     methods: ["GET", "POST", "DELETE", "PUT"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Expires", "Pragma"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
 
-// 🔹 Usar rutas
+// 🔹 Usar rutas de API
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/shop/products", shopProductsRouter);
@@ -39,6 +40,13 @@ app.use("/api/shop/address", shopAddressRouter);
 app.use("/api/shop/orders", shopOrderRouter);
 app.use("/api/admin/orders", adminOrderRouter);
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+// 🔹 Servir el frontend compilado (Vite)
+app.use(express.static(path.join(__dirname, "../client/dist"))); // __dirname ya funciona
 
-module.exports = app; // Exportar la app si es necesario
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html")); // __dirname ya funciona
+});
+
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+module.exports = app;
