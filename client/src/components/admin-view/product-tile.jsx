@@ -1,248 +1,129 @@
 
+// import { Card, CardContent, CardFooter } from "../ui/card";
+// import { Button } from "../ui/button";
+
+// function AdminProductTile({product
+//      , setFormData, 
+//      setOpenCreateProductsDialog, 
+//      setCurrentEditedId,
+//      handleDelete
+//     }){
+
+//     return (
+//         <Card className = "w-full max-w-sm mx-auto">
+//             <div>
+//                 <div className="relative ">
+//                     <img src={product?.image}
+//                     alt={product?.tile}
+//                     className="w-full h-[300px] object-cover rounded-t-lg"
+//                     />
+//                 </div>
+//                 <CardContent>
+//                     <h2 className="text-xl font-bold mb-2 mt-2 ">{product?.title}</h2>
+//                     <div className="flex justify-between items-center mb-2">
+//                         <span className={`${product?.salePrice > 0 ? 'line-through' : ''}text-lg font-semibold text-primary`}>${product?.price}        
+//                         </span>
+//                         {
+//                             product?.salePrice > 0 ? <span className="text-lg font-bold">${product?.salePrice}</span> : null
+//                         }
+                        
+//                     </div>
+//                 </CardContent>
+//                 <CardFooter className = "flex justify-between items-center">
+//                         <Button onClick={()=>{
+//                             setOpenCreateProductsDialog(true)
+//                             setCurrentEditedId(product?.id)
+//                             setFormData(product);
+//                         }}>Edit</Button>
+//                         <Button onClick={()=> handleDelete(product?.id)}>Delete</Button>
+
+
+//                 </CardFooter>
+
+//             </div>
+//         </Card>
+
+
+
+
+//     );
+// }
+
+
+
+// export default AdminProductTile;
+
+
+
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { Button } from "../ui/button";
+import { Pencil, Trash2 } from "lucide-react";
 
-function AdminProductTile({product
-     , setFormData, 
-     setOpenCreateProductsDialog, 
-     setCurrentEditedId,
-     handleDelete
-    }){
-
-    return (
-        <Card className = "w-full max-w-sm mx-auto">
-            <div>
-                <div className="relative ">
-                    <img src={product?.image}
-                    alt={product?.tile}
-                    className="w-full h-[300px] object-cover rounded-t-lg"
-                    />
-                </div>
-                <CardContent>
-                    <h2 className="text-xl font-bold mb-2 mt-2 ">{product?.title}</h2>
-                    <div className="flex justify-between items-center mb-2">
-                        <span className={`${product?.salePrice > 0 ? 'line-through' : ''}text-lg font-semibold text-primary`}>${product?.price}        
-                        </span>
-                        {
-                            product?.salePrice > 0 ? <span className="text-lg font-bold">${product?.salePrice}</span> : null
-                        }
-                        
-                    </div>
-                </CardContent>
-                <CardFooter className = "flex justify-between items-center">
-                        <Button onClick={()=>{
-                            setOpenCreateProductsDialog(true)
-                            setCurrentEditedId(product?.id)
-                            setFormData(product);
-                        }}>Edit</Button>
-                        <Button onClick={()=> handleDelete(product?.id)}>Delete</Button>
-
-
-                </CardFooter>
-
+function AdminProductTile({
+  product,
+  setFormData,
+  setOpenCreateProductsDialog,
+  setCurrentEditedId,
+  handleDelete
+}) {
+  return (
+    <Card className="w-full max-w-sm mx-auto transition-all duration-300 hover:shadow-lg">
+      <div>
+        <div className="relative">
+          <img 
+            src={product?.image}
+            alt={product?.title}
+            className="w-full h-[300px] object-cover rounded-t-lg"
+          />
+          {product?.salePrice > 0 && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md font-semibold text-sm">
+              SALE
             </div>
-        </Card>
-
-
-
-
-    );
+          )}
+        </div>
+        <CardContent className="p-5">
+          <h2 className="text-xl font-bold mb-3 truncate">{product?.title}</h2>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex flex-col">
+              <span className={`${product?.salePrice > 0 ? 'line-through text-gray-500 text-sm' : 'text-lg font-semibold text-primary'}`}>
+                ${product?.price}
+              </span>
+              {product?.salePrice > 0 && (
+                <span className="text-lg font-bold text-red-500">${product?.salePrice}</span>
+              )}
+            </div>
+            {product?.inventory && (
+              <span className="text-sm text-gray-500">
+                {product.inventory > 10 ? 'In Stock' : `${product.inventory} left`}
+              </span>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between items-center p-4 border-t">
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => {
+              setOpenCreateProductsDialog(true);
+              setCurrentEditedId(product?.id);
+              setFormData(product);
+            }}
+          >
+            <Pencil size={16} />
+            Edit
+          </Button>
+          <Button 
+            variant="destructive"
+            className="flex items-center gap-2"
+            onClick={() => handleDelete(product?.id)}
+          >
+            <Trash2 size={16} />
+            Delete
+          </Button>
+        </CardFooter>
+      </div>
+    </Card>
+  );
 }
 
-
-
 export default AdminProductTile;
-
-
-
-// import ProductFilter from "@/components/shopping-view/filter";
-// import ProductDetailsDialog from "@/components/shopping-view/product-details";
-// import ShoppingProductTile from "@/components/shopping-view/product-tile";
-// import { Button } from "@/components/ui/button";
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-// import { sortOptions } from "@/config";
-// import { useToast } from "@/hooks/use-toast";
-// import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
-// import mimos from "../../assets/mallowizq.jpg"
-
-
-
-
-// import { fetchAllFilteredProducts, fetchProductDetails } from "@/store/shop/products-slice";
-
-// import { ArrowUpDownIcon, CloudCog } from "lucide-react";
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { createSearchParams, useSearchParams } from "react-router-dom";
-
-
-
-
-
-// function createSearchParamshelper(filterParams){
-//     const queryParams = [];
-
-//     for(const[key,value] of Object.entries(filterParams)){
-//         if(Array.isArray(value) && value.length > 0){
-//             const paramValue = value.join(',')
-
-//             queryParams.push(`${key}=${encodeURIComponent(paramValue)}`)
-//         }
-//     } 
-//     return queryParams.join("&")
-
-// }
-
-
-
-// function ShoppingListing(){
-
-//     const dispatch = useDispatch();
-//     const {productList, productDetails} = useSelector(state => state.shopProducts)
-//     const{user} = useSelector(state =>state.auth)
-//     // const {cartItems} =useSelector(state => state.shopCart)
-//     const [filters, setFilters] = useState({});
-//     const [sort, setSort] = useState(null)
-//     const [searchParams, setSearchParams] = useSearchParams()
-//     const [openDetailsDialog, setOpenDetailsDialog] = useState(false)
-//     const {toast} = useToast()
-
-//     useEffect(()=>{
-//         if(filters !==null && sort !== null )
-//         dispatch(fetchAllFilteredProducts({filterParams : filters,sortParams : sort}));
-//     },[dispatch, sort , filters])
-
-
-//     // console.log(productDetails, "pruebas product details");
-    
-//    // funcion para ordenar
-
-//    function handleSort(value){
-//     // console.log(value , "sort")
-//     setSort(value);
-
-//    }
-
-//    function handleFilter(getSectionId, getCurrentOption){
-//     // console.log(getSectionId, getCurrentOption, "filtros" );
-
-//     let cpyFilters = {...filters};
-//     const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
-
-//     if(indexOfCurrentSection === -1 ){
-//         cpyFilters = {
-//             ...cpyFilters,
-//             [getSectionId] : [getCurrentOption]
-//         }
-//     } else{
-//         const indexOfCurrentSection = cpyFilters[getSectionId].indexOf(getCurrentOption);
-//         if(indexOfCurrentSection === -1) cpyFilters[getSectionId].push(getCurrentOption)
-//             else cpyFilters[getSectionId].splice(indexOfCurrentSection,1)
-//     }
-
-//     setFilters(cpyFilters)
-//     sessionStorage.setItem("filters",JSON.stringify(cpyFilters))
-
-//    }
-
-
-//    //handleGetProductDetails
-
-
-//    function handleGetProductDetails(getCurrentProductId){
-//     // console.log(getCurrentProductId, "current id");
-//     dispatch(fetchProductDetails(getCurrentProductId))
-
-
-//    }
-
-//    function handleAddtoCart(getCurrentProductId){
-//     console.log(getCurrentProductId , "getcurrentproductID");
-//     dispatch(
-//         addToCart({
-//             userId : user?.id, 
-//             productId: getCurrentProductId , 
-//             quantity:1})
-//         ).then((data) => {
-//             if(data?.payload?.success){
-//                 dispatch(fetchCartItems(user?.id));
-//                 toast({
-//                     title : 'Product is added to cart',
-//                 })
-
-//             }
-//         })
-    
-
-//    }
-
-//    useEffect(()=>{
-//     if(productDetails !== null) setOpenDetailsDialog(true) 
-
-//    },[productDetails])
-
-//     // console.log(filters,setSearchParams, "filters");
-
-//    useEffect(()=>{
-//     setSort ("price-lowtohigh");
-//     setFilters(JSON.parse(sessionStorage.getItem('filters')) || {})
-
-//    }, [])
-
-
-
-
-//    useEffect(()=>{
-//     if(filters && Object.keys(filters).length > 0){
-//         const createQueryString =  createSearchParamshelper(filters)
-//         setSearchParams(new URLSearchParams(createQueryString))
-//     }
-
-//    },[filters])
-
-// //    console.log(cartItems, "cartItems");
-   
-
-//     return <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
-//         <ProductFilter filters={filters} handleFilter={handleFilter}/>
-//         <div className="bg-background w-full rounded-lg shadow-sm ">
-//             <div className="p-4 border-b gap-3 flex items-center justify-between">
-//                 <h2 className="text-lg font-extrabold">All products</h2>
-//                 <div className="flex items-center gap-3 ">
-//                     <span className="text-muted-foreground">10</span>
-//                     <DropdownMenu>
-//                     <DropdownMenuTrigger asChild>
-//                         <Button variant="outline" size="sm" className="flex items-center gap-1">
-//                             <ArrowUpDownIcon className=" h-4 w-4"/>
-//                             <span>Sort by </span>
-//                         </Button>
-//                     </DropdownMenuTrigger>
-//                     <DropdownMenuContent align="end" className="w-[200px] ">
-//                         <DropdownMenuRadioGroup value={sort} onValueChange={handleSort}>
-//                             {sortOptions.map(sortItem => <DropdownMenuRadioItem value={sortItem.id} key={sortItem.id}>
-//                                 {sortItem.label}</DropdownMenuRadioItem>)}
-//                         </DropdownMenuRadioGroup>
-//                     </DropdownMenuContent>
-//                 </DropdownMenu>
-//                 </div>
-//             </div>
-//             <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-4">   
-//             {
-//     productList?.data && productList.data.length > 0 ?
-//     productList.data.map(productItem => <ShoppingProductTile handleAddtoCart={handleAddtoCart} handleGetProductDetails={handleGetProductDetails} key={productItem._id} product={productItem}/>) : <img className="w-full h-full" src={mimos}/>
-// }
-
-            
-//             </div>
-           
-//         </div>
-//         <ProductDetailsDialog 
-//         open={openDetailsDialog} 
-//         setOpen={setOpenDetailsDialog} 
-//         productDetails={productDetails}
-//         />
-
-//     </div>      
-    
-// }
-// export default ShoppingListing;

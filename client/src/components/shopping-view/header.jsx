@@ -16,35 +16,37 @@ import { fetchCartItems } from "@/store/shop/cart-slice";
 import { Label } from "../ui/label";
 
 
-function MenuItems (){
+function MenuItems() {
 
     const navigate = useNavigate()
     const location = useLocation()
-    const [searchParams, setSearchParams] = useSearchParams() 
+    const [searchParams, setSearchParams] = useSearchParams()
 
-    function handleNavigate(getCurrentMenuItem){
+    function handleNavigate(getCurrentMenuItem) {
         sessionStorage.removeItem('filters');
-        const currentFilter = getCurrentMenuItem.id !== 'home'&& getCurrentMenuItem.id !== 'products'? 
-        {
-            category : [getCurrentMenuItem.id]
-        } : null
-        sessionStorage.setItem('filters',JSON.stringify(currentFilter))
+        const currentFilter = getCurrentMenuItem.id !== 'home' && getCurrentMenuItem.id !== 'products' ?
+            {
+                category: [getCurrentMenuItem.id]
+            } : null
+        sessionStorage.setItem('filters', JSON.stringify(currentFilter))
         location.pathname.includes('listing') && currentFilter !== null ?
-        setSearchParams(new URLSearchParams(`?category=${getCurrentMenuItem.id}`)) :
-        navigate(getCurrentMenuItem.path)
+            setSearchParams(new URLSearchParams(`?category=${getCurrentMenuItem.id}`)) 
+            :
+            navigate(getCurrentMenuItem.path)
+            // console.log("navigate to: ", getCurrentMenuItem.path)
     }
 
 
     return <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-4 lg:flex-row">
         {
-            shoppingViewHeaderMenuItems.map((menuItem) => 
+            shoppingViewHeaderMenuItems.map((menuItem) =>
 
-            <Label onClick={()=>handleNavigate(menuItem)} className="text-lg font-medium cursor-pointer text-pink-500 hover:text-purple-600" 
-            key={menuItem.id} 
-            >
-            {menuItem.label}
-            </Label>)
-            
+                <Label onClick={() => handleNavigate(menuItem)} className="text-lg font-medium cursor-pointer text-pink-500 hover:text-purple-600"
+                    key={menuItem.id}
+                >
+                    {menuItem.label}
+                </Label>)
+
         }
 
     </nav>
@@ -87,13 +89,13 @@ function HeaderRightContent() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Avatar className="bg-pink-600 rounded-full">
-                        <AvatarFallback className= "w-10 h-10bg-black text-white font-extrabold">
-                        {user?.userName.slice(0,2).toUpperCase()}
-                            </AvatarFallback>
-                    </Avatar>
+                    <AvatarFallback className="w-10 h-10bg-black text-white font-extrabold">
+                        {user?.userName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-                side="right" 
+            <DropdownMenuContent
+                side="right"
                 className="w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 p-2"
             >
                 <div className="px-3 py-2">
@@ -102,7 +104,7 @@ function HeaderRightContent() {
                     </DropdownMenuLabel>
                 </div>
                 <DropdownMenuSeparator className="my-1 border-t border-gray-100" />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                     className="px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md cursor-pointer flex items-center"
                     onClick={() => navigate('/shop/account')}
                 >
@@ -110,7 +112,7 @@ function HeaderRightContent() {
                     Account
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-1 border-t border-gray-100" />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                     className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer flex items-center"
                     onClick={handleLogout}
                 >
@@ -123,44 +125,44 @@ function HeaderRightContent() {
 }
 
 
-function ShoppingHeader(){
+function ShoppingHeader() {
 
-    const{isAuthenticated} = useSelector(state=>state.auth)
+    const { isAuthenticated } = useSelector(state => state.auth)
     // console.log(user, "userShopping")
     // console.log(cartItems, "CART ITEMS");
-    
 
 
-    return(
-       <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="flex h-16 items-center justify-between px-4 md:px-6">
-            <Link to={"/shop/home"} className="flex items-center gap-4 px-4">
-                <Cat className="text-purple-800 h-6 w-6 gap-2" />
-                <span className="font-bold text-pink-400">MimitoShop</span>
-            </Link>
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" className="lg:hidden">
-                    <Menu className="h-6 w-6" />
-                        <span className="sr-only">Toggle Header menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side= "left" className ="w-full max-w-xs">
-                    <MenuItems/>
-                    <HeaderRightContent/>
-                </SheetContent>
-            </Sheet>
-            <div className="hidden lg:block ml:6">
-                <MenuItems/>
+
+    return (
+        <header className="sticky top-0 z-40 w-full border-b bg-background">
+            <div className="flex h-16 items-center justify-between px-4 md:px-6">
+                <Link to={"/shop/home"} className="flex items-center gap-4 px-4">
+                    <Cat className="text-purple-800 h-6 w-6 gap-2" />
+                    <span className="font-bold text-pink-400">MimitoShop</span>
+                </Link>
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="outline" size="icon" className="lg:hidden">
+                            <Menu className="h-6 w-6" />
+                            <span className="sr-only">Toggle Header menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-full max-w-xs">
+                        <MenuItems />
+                        <HeaderRightContent />
+                    </SheetContent>
+                </Sheet>
+                <div className="hidden lg:block ml:6">
+                    <MenuItems />
+
+                </div>
+
+                <div className="hidden lg:block">
+                    <HeaderRightContent />
+                </div>
 
             </div>
-            
-                <div className="hidden lg:block">
-                    <HeaderRightContent/>
-                </div> 
-            
-        </div>
-       </header>
+        </header>
     );
 }
 

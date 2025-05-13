@@ -69,10 +69,10 @@ function AuthLogin() {
                     {/* Social Login Buttons */}
                     <div className="grid grid-cols-2 gap-4">
                         <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <span className="text-sm font-medium text-gray-700">Google</span>
+                            <span className="text-sm font-medium text-white">Google</span>
                         </button>
                         <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <span className="text-sm font-medium text-gray-700">Facebook</span>
+                            <span className="text-sm font-medium text-white">Facebook</span>
                         </button>
                     </div>
 

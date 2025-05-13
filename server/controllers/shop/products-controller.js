@@ -1,8 +1,6 @@
 const supabase = require('../../config/supabase'); // Asegúrate de importar el cliente de Supabase
 
-// Obtener productos filtrados y ordenados
 
-// Obtener productos con filtros dinámicos
 const getFilteredProducts = async (req, res) => {
     try {
         let { title, category, brand, minPrice, maxPrice, sortBy } = req.query;
