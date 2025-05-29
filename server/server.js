@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const path = require("path");
+// const path = require("path"); // Ya no es necesario
 
 // 🔹 Importar Supabase
 const supabase = require("./config/supabase");
@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 5000;
 // 🔹 Middlewares
 app.use(
   cors({
-    origin: "https://a-mimos-sb.onrender.com",
+    origin: ["https://a-mimos-sb.onrender.com", "http://localhost:5173"], // Ahora acepta múltiples orígenes
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -44,12 +44,11 @@ app.use("/api/admin/orders", adminOrderRouter);
 app.use("/api/shop/search",shopSearchProduct)
 
 
-// 🔹 Servir el frontend compilado (Vite)
-app.use(express.static(path.join(__dirname, "../client/dist"))); // __dirname ya funciona
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist", "index.html")); // __dirname ya funciona
-});
+// 🔹 Elimina las siguientes líneas para que el backend deje de servir el frontend:
+// app.use(express.static(path.join(__dirname, "../client/dist")));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+// });
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 

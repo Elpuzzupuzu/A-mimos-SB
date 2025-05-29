@@ -1,9 +1,12 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// 🔹 Define la URL base de tu API aquí
+const API_BASE_URL = 'http://localhost:5000/api'; 
+
 const initialState = {
     isLoading: false,
-    searchResults: { data: [] },  // Modificado para ser un objeto con la propiedad 'data'
+    searchResults: { data: [] },
 };
 
 // Acción para buscar productos
@@ -17,10 +20,11 @@ export const searchProducts = createAsyncThunk(
         });
 
         try {
-            const result = await axios.get(`http://localhost:5000/api/shop/search?${queryParams}`);
+            // 🔹 Usa la URL base aquí
+            const result = await axios.get(`${API_BASE_URL}/shop/search?${queryParams}`);
             
             // Regresamos un objeto con la propiedad 'data' para que sea consistente con el estado
-            return { data: result?.data?.data || [] };  // Aquí asignamos 'data' en lugar de 'products'
+            return { data: result?.data?.data || [] };
         } catch (error) {
             console.error("Error searching products:", error);
             throw error;
@@ -33,7 +37,7 @@ const searchProductSlice = createSlice({
     initialState,
     reducers: {
         clearSearchResults: (state) => {
-            state.searchResults = { data: [] };  // Limpiar resultados de búsqueda
+            state.searchResults = { data: [] };
         }
     },
     extraReducers: (builder) => {
@@ -43,11 +47,11 @@ const searchProductSlice = createSlice({
             })
             .addCase(searchProducts.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.searchResults = action.payload;  // Asignamos el objeto con 'data'
+                state.searchResults = action.payload;
             })
-            .addCase(searchProducts.rejected, (state, action) => {
+            .addCase(searchProducts.rejected, (state) => { // Eliminado 'action' si no se usa
                 state.isLoading = false;
-                state.searchResults = { data: [] };  // Aseguramos que 'searchResults' siempre tenga 'data'
+                state.searchResults = { data: [] };
             });
     }
 });

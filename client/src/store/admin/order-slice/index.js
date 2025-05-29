@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// 🔹 Define la URL base de tu API aquí
+const API_BASE_URL = 'http://localhost:5000/api'; 
+
 const initialState = {
   orderList: [],
   orderDetails: null,
@@ -9,11 +12,12 @@ const initialState = {
   error: null,
 };
 
+// 🔹 Thunks refactorizados para usar la URL base
 export const getAllOrdersForAdmin = createAsyncThunk(
   "/order/getAllOrdersForAdmin",
   async () => {
     const response = await axios.get(
-      `http://localhost:5000/api/admin/orders/get`
+      `${API_BASE_URL}/admin/orders/get` // 🔹 Usando la URL base
     );
     return response.data;
   }
@@ -23,7 +27,7 @@ export const getOrderDetailsForAdmin = createAsyncThunk(
   "/order/getOrderDetailsForAdmin",
   async (id) => {
     const response = await axios.get(
-      `http://localhost:5000/api/admin/orders/details/${id}`
+      `${API_BASE_URL}/admin/orders/details/${id}` // 🔹 Usando la URL base
     );
     return response.data;
   }
@@ -34,7 +38,7 @@ export const createNewOrder = createAsyncThunk(
   async (orderData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/shop/orders/create`,
+        `${API_BASE_URL}/shop/orders/create`, // 🔹 Usando la URL base (ruta de shop para crear orden)
         orderData
       );
       return response.data;
@@ -49,7 +53,7 @@ export const updateOrderStatus = createAsyncThunk(
   async ({ id, orderStatus }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/admin/orders/update/${id}`,
+        `${API_BASE_URL}/admin/orders/update/${id}`, // 🔹 Usando la URL base
         { orderStatus }
       );
       return response.data;
@@ -58,6 +62,8 @@ export const updateOrderStatus = createAsyncThunk(
     }
   }
 );
+
+
 
 const adminOrderSlice = createSlice({
   name: "adminOrderSlice",
@@ -90,8 +96,9 @@ const adminOrderSlice = createSlice({
         state.isLoading = false;
         state.orderDetails = {
           ...action.payload.data,
-          cartItems: JSON.parse(action.payload.data.cartItems), // Convertir a array
-          addressInfo: JSON.parse(action.payload.data.addressInfo), // Convertir a objeto
+          // Añadimos verificaciones para evitar errores si los datos no están presentes
+          cartItems: action.payload.data?.cartItems ? JSON.parse(action.payload.data.cartItems) : [], 
+          addressInfo: action.payload.data?.addressInfo ? JSON.parse(action.payload.data.addressInfo) : {}, 
         };
       })
       .addCase(getOrderDetailsForAdmin.rejected, (state) => {
@@ -109,7 +116,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(createNewOrder.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload; // El payload ya contiene el error de rejectWithValue
       })
       .addCase(updateOrderStatus.pending, (state) => {
         state.isLoading = true;
@@ -128,6 +135,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload; // Asegúrate de capturar el error de rejectWithValue
       });
   },
 });

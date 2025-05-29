@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// 🔹 Define la URL base de tu API aquí
+const API_BASE_URL = 'http://localhost:5000/api'; 
+
 const initialState = {
   isLoading: false,
   addressList: [],
@@ -10,10 +13,10 @@ export const addNewAddress = createAsyncThunk(
   "/addresses/addNewAddress",
   async (formData) => {
     const response = await axios.post(
-      "http://localhost:5000/api/shop/address/add",
+      `${API_BASE_URL}/shop/address/add`, // 🔹 Usando la URL base
       formData
     );
-    return response.data.data;  // Aseguramos que el payload contenga la propiedad 'data' con las direcciones
+    return response.data.data;
   }
 );
 
@@ -21,9 +24,9 @@ export const fetchAllAddresses = createAsyncThunk(
   "/addresses/fetchAllAddresses",
   async (userId) => {
     const response = await axios.get(
-      `http://localhost:5000/api/shop/address/get/${userId}`
+      `${API_BASE_URL}/shop/address/get/${userId}` // 🔹 Usando la URL base
     );
-    return response.data.data;  // Aseguramos que estamos extrayendo el 'data' correcto
+    return response.data.data;
   }
 );
 
@@ -31,10 +34,10 @@ export const editaAddress = createAsyncThunk(
   "/addresses/editaAddress",
   async ({ userId, addressId, formData }) => {
     const response = await axios.put(
-      `http://localhost:5000/api/shop/address/update/${userId}/${addressId}`,
+      `${API_BASE_URL}/shop/address/update/${userId}/${addressId}`, // 🔹 Usando la URL base
       formData
     );
-    return response.data.data;  // Aseguramos que el payload contenga la propiedad 'data' con la dirección editada
+    return response.data.data;
   }
 );
 
@@ -42,9 +45,9 @@ export const deleteAddress = createAsyncThunk(
   "/addresses/deleteAddress",
   async ({ userId, addressId }) => {
     const response = await axios.delete(
-      `http://localhost:5000/api/shop/address/delete/${userId}/${addressId}`
+      `${API_BASE_URL}/shop/address/delete/${userId}/${addressId}` // 🔹 Usando la URL base
     );
-    return response.data.data;  // Aseguramos que el payload contenga la propiedad 'data' con la dirección eliminada
+    return response.data.data;
   }
 );
 
@@ -59,9 +62,8 @@ const addressSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(addNewAddress.fulfilled, (state, action) => {
-        // console.log('Datos recibidos:', action.payload); // Verifica si los datos son los esperados
         state.isLoading = false;
-        state.addressList.push(action.payload); // Añadir la nueva dirección a la lista
+        state.addressList.push(action.payload);
       })
       .addCase(addNewAddress.rejected, (state) => {
         state.isLoading = false;
@@ -74,9 +76,9 @@ const addressSlice = createSlice({
       })
       .addCase(fetchAllAddresses.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.addressList = action.payload; // Aquí asignamos directamente el array de direcciones
+        state.addressList = action.payload;
       })
-      .addCase(fetchAllAddresses.rejected, (state) => {
+      .addCase(fetchAllAddresses.rejected, (state, action) => { // 🔹 Incluí 'action' para acceder al error
         state.isLoading = false;
         state.addressList = [];
         console.error('Error fetching addresses:', action.error.message);
@@ -89,12 +91,11 @@ const addressSlice = createSlice({
       })
       .addCase(editaAddress.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Actualiza la dirección editada en la lista
         state.addressList = state.addressList.map((address) =>
           address.id === action.payload.id ? action.payload : address
         );
       })
-      .addCase(editaAddress.rejected, (state) => {
+      .addCase(editaAddress.rejected, (state, action) => { // 🔹 Incluí 'action' para acceder al error
         state.isLoading = false;
         console.error('Error editing address:', action.error.message);
       });
@@ -106,12 +107,11 @@ const addressSlice = createSlice({
       })
       .addCase(deleteAddress.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Elimina la dirección de la lista
         state.addressList = state.addressList.filter(
           (address) => address.id !== action.payload.id
         );
       })
-      .addCase(deleteAddress.rejected, (state) => {
+      .addCase(deleteAddress.rejected, (state, action) => { // 🔹 Incluí 'action' para acceder al error
         state.isLoading = false;
         console.error('Error deleting address:', action.error.message);
       });

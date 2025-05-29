@@ -1,19 +1,23 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// 🔹 Define la URL base de tu API aquí
+const API_BASE_URL = 'http://localhost:5000/api'; 
+
 const initialState = {
     approvalURL: null,
     isLoading: false,
     orderId: null,
     orderList: [],
     orderDetails: null,
-    redirectURL: null,  // Nuevo campo para almacenar la URL de redirección
+    redirectURL: null, 
 };
 
+// 🔹 Thunks refactorizados para usar la URL base
 export const createNewOrder = createAsyncThunk(
     'order/createNewOrder', 
     async (orderData) => {
-        const response = await axios.post('http://localhost:5000/api/shop/orders/create', orderData);
+        const response = await axios.post(`${API_BASE_URL}/shop/orders/create`, orderData);
         return response.data;
     }
 );
@@ -21,7 +25,7 @@ export const createNewOrder = createAsyncThunk(
 export const capturePayment = createAsyncThunk(
     'order/capturePayment', 
     async ({ paymentId, payerId, orderId }) => {
-        const response = await axios.post('http://localhost:5000/api/shop/orders/capture', {
+        const response = await axios.post(`${API_BASE_URL}/shop/orders/capture`, {
             paymentId, 
             payerId, 
             orderId
@@ -33,7 +37,7 @@ export const capturePayment = createAsyncThunk(
 export const getAllOrdersByUserId = createAsyncThunk(
     'order/getAllOrdersByUserId', 
     async (userId) => {
-        const response = await axios.get(`http://localhost:5000/api/shop/orders/list/${userId}`);
+        const response = await axios.get(`${API_BASE_URL}/shop/orders/list/${userId}`);
         return response.data;
     }
 );
@@ -41,14 +45,14 @@ export const getAllOrdersByUserId = createAsyncThunk(
 export const getOrderDetails = createAsyncThunk(
     'order/getOrderDetails', 
     async (id) => {
-        const response = await axios.get(`http://localhost:5000/api/shop/orders/details/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/shop/orders/details/${id}`);
         console.log("Detalles de la orden:", response.data);
 
         return response.data;
     }
 );
 
-/// fin AsyncThunk
+
 
 const shoppingOrderSlice = createSlice({
     name: 'shoppingOrderSlice',
@@ -97,8 +101,9 @@ const shoppingOrderSlice = createSlice({
                 state.isLoading = false;
                 state.orderDetails = {
                     ...action.payload.data,
-                    cartItems: JSON.parse(action.payload.data.cartItems), // Convertir a array
-                    addressInfo: JSON.parse(action.payload.data.addressInfo) // Convertir a objeto
+                    // Asegúrate de que payload.data y sus propiedades existan antes de intentar parsear
+                    cartItems: action.payload.data?.cartItems ? JSON.parse(action.payload.data.cartItems) : [], 
+                    addressInfo: action.payload.data?.addressInfo ? JSON.parse(action.payload.data.addressInfo) : {} 
                 };
             })
             
@@ -113,11 +118,9 @@ const shoppingOrderSlice = createSlice({
             })
             .addCase(capturePayment.fulfilled, (state, action) => {
                 state.isLoading = false;
-                // Almacenamos la URL de redirección
                 state.redirectURL = action.payload.redirectURL;
-                // Redirigir al usuario, si es necesario
                 if (state.redirectURL) {
-                    window.location.href = state.redirectURL;  // Redirigir al frontend
+                    window.location.href = state.redirectURL;
                 }
             })
             .addCase(capturePayment.rejected, (state) => {

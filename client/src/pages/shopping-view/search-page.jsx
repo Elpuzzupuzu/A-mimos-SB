@@ -1,7 +1,7 @@
 // search-page.jsx
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { searchProducts, clearSearchResults } from "../../redux/shop/search-slice";
+// import { searchProducts, clearSearchResults } from "../../redux/shop/search-slice";
 
 const SearchPage = () => {
     const dispatch = useDispatch();

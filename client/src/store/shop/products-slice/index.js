@@ -1,9 +1,12 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// 🔹 Define la URL base de tu API aquí
+const API_BASE_URL = 'http://localhost:5000/api'; 
+
 const initialState = {
     isLoading: false,
-    productList: { data: [] },  // Modificado para ser un objeto con la propiedad 'data'
+    productList: { data: [] },
     productDetails: null
 };
 
@@ -17,10 +20,11 @@ export const fetchAllFilteredProducts = createAsyncThunk(
         });
 
         try {
-            const result = await axios.get(`http://localhost:5000/api/shop/products/get?${query}`);
+            // 🔹 Usa la URL base aquí
+            const result = await axios.get(`${API_BASE_URL}/shop/products/get?${query}`);
             
             // Regresamos un objeto con la propiedad 'data' para que sea consistente con el estado
-            return { data: result?.data?.data || [] };  // Aquí asignamos 'data' en lugar de 'products'
+            return { data: result?.data?.data || [] };
         } catch (error) {
             console.error("Error fetching products:", error);
             throw error;
@@ -33,7 +37,8 @@ export const fetchProductDetails = createAsyncThunk(
     "/products/fetchProductDetails",
     async (id) => {
         try {
-            const result = await axios.get(`http://localhost:5000/api/shop/products/get/${id}`);
+            // 🔹 Usa la URL base aquí
+            const result = await axios.get(`${API_BASE_URL}/shop/products/get/${id}`);
             console.log(result, "busqueda por id");
             return result?.data;
         } catch (error) {
@@ -59,12 +64,12 @@ const shoppingProductSlice = createSlice({
             .addCase(fetchAllFilteredProducts.fulfilled, (state, action) => {
                 console.log(action.payload, "action payload index");
                 state.isLoading = false;
-                state.productList = action.payload;  // Asignamos el objeto con 'data'
+                state.productList = action.payload;
             })
             .addCase(fetchAllFilteredProducts.rejected, (state, action) => {
                 console.log(action.payload);
                 state.isLoading = false;
-                state.productList = { data: [] };  // Aseguramos que 'productList' siempre tenga 'data'
+                state.productList = { data: [] };
             })
             .addCase(fetchProductDetails.pending, (state) => {
                 state.isLoading = true;
@@ -72,7 +77,7 @@ const shoppingProductSlice = createSlice({
             .addCase(fetchProductDetails.fulfilled, (state, action) => {
                 console.log(action.payload, "action payload index");
                 state.isLoading = false;
-                state.productDetails = action.payload.data;  // Ajusta según la estructura de la respuesta de la API
+                state.productDetails = action.payload.data; // Ajusta según la estructura de la respuesta de la API
             })
             .addCase(fetchProductDetails.rejected, (state, action) => {
                 console.log(action.payload);
