@@ -2,7 +2,7 @@ import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // 🔹 Define la URL base de tu API aquí
-const API_BASE_URL = 'http://localhost:5000/api'; 
+const API_BASE_URL = 'https://a-mimos-sb-1.onrender.com/api'; 
 
 const initialState = {
     isLoading: false,

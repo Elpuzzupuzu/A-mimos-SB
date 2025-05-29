@@ -2,7 +2,7 @@ import './App.css';
 import AdminLayout from './components/admin-view/layout';
 import AuthLayout from './components/auth/layout';
 import ShoppingLayout from './components/shopping-view/layout';
-import SearchLayout from './components/shopping-view/SearchLayout';  // Importa SearchLayout de forma independiente
+// import SearchLayout from './components/shopping-view/SearchLayout';  // Importa SearchLayout de forma independiente
 import AdminDashboard from './pages/admin-view/dashboard';
 import AdminFeatures from './pages/admin-view/features';
 import AdminOrders from './pages/admin-view/order';
