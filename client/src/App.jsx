@@ -2,27 +2,27 @@ import './App.css';
 import AdminLayout from './components/admin-view/layout';
 import AuthLayout from './components/auth/layout';
 import ShoppingLayout from './components/shopping-view/layout';
-// import SearchLayout from './components/shopping-view/SearchLayout'; // Importa SearchLayout de forma independiente
+// import SearchLayout from './components/shopping-view/SearchLayout';
 import AdminDashboard from './pages/admin-view/dashboard';
 import AdminFeatures from './pages/admin-view/features';
 import AdminOrders from './pages/admin-view/order';
 import AdminProducts from './pages/admin-view/products';
 import AuthLogin from './pages/auth/login';
 import AutRegister from './pages/auth/register';
-import RecoverPassword from './pages/auth/RecoverPassword'; // Importa RecoverPassword
+import RecoverPassword from './pages/auth/RecoverPassword';
 import { Routes, Route } from 'react-router-dom';
 import NotFound from './pages/not-found';
 import ShoppingHome from './pages/shopping-view/home';
 import ShoppingListing from './pages/shopping-view/listing';
 import ShoppingCheckout from './pages/shopping-view/checkout';
 import ShoppingAccount from './pages/shopping-view/account';
-import CheckAuth from './components/common/check-auth';
+import CheckAuth from './components/common/check-auth'; // Mantenemos la importación pero no la usaremos en /auth
 import UnauthPage from './pages/unauth-page';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { checkAuth } from './store/auth-slice';
 import { Skeleton } from "@/components/ui/skeleton"
-import PaypalReturnPage from './pages/shopping-view/paypal-return'; // Importa la nueva página
+import PaypalReturnPage from './pages/shopping-view/paypal-return';
 import PaypalSuccessPage from './pages/shopping-view/payment-success';
 import SearchPage from './pages/shopping-view/search-page';
 
@@ -34,24 +34,23 @@ function App() {
         dispatch(checkAuth())
     }, [dispatch]);
 
-    if (isLoading) return <Skeleton className="w-[800px] bg-black h-[600px] " />
+    // Opcional: Para esta prueba, podrías incluso comentar temporalmente esta línea para evitar la Skeleton
+    // si sospechas que el error ocurre antes de que la skeleton se renderice.
+    // if (isLoading) return <Skeleton className="w-[800px] bg-black h-[600px] " />
 
-    console.log(isLoading, user) // Esto te seguirá mostrando 'false null' si no hay usuario autenticado
+    console.log(isLoading, user)
 
     return (
         <div className="flex flex-col overflow-hidden bg-white">
             <Routes>
-                {/* Rutas de autenticación - NO están protegidas por CheckAuth a nivel superior */}
-                {/* CheckAuth se encarga de redirigir a /auth/login si el usuario no está autenticado */}
-                {/* y intenta acceder a rutas protegidas. Pero estas rutas de /auth/login, /auth/register */}
-                {/* deben ser accesibles directamente. */}
+                {/* Rutas de autenticación - SIN CheckAuth para esta prueba */}
                 <Route path="/auth" element={<AuthLayout />}>
                     <Route path="login" element={<AuthLogin />} />
                     <Route path="register" element={<AutRegister />} />
                     <Route path="recover-password" element={<RecoverPassword />} />
                 </Route>
 
-                {/* Rutas del admin - PROTEGIDAS por CheckAuth */}
+                {/* Rutas del admin - Siguen protegidas por CheckAuth */}
                 <Route path="/admin" element={
                     <CheckAuth isAuthenticated={isAuthenticated} user={user}>
                         <AdminLayout />
@@ -63,7 +62,7 @@ function App() {
                     <Route path="features" element={<AdminFeatures />} />
                 </Route>
 
-                {/* Rutas de la tienda - PROTEGIDAS por CheckAuth */}
+                {/* Rutas de la tienda - Siguen protegidas por CheckAuth */}
                 <Route path="/shop" element={
                     <CheckAuth isAuthenticated={isAuthenticated} user={user}>
                         <ShoppingLayout />
@@ -75,17 +74,11 @@ function App() {
                     <Route path="account" element={<ShoppingAccount />} />
                     <Route path="paypal-return" element={<PaypalReturnPage />} />
                     <Route path="payment-success" element={<PaypalSuccessPage />} />
-                    {/* <Route path="search" element={<SearchLayout />} />  */}
                 </Route>
 
-                {/* Ruta para la página de búsqueda - independiente del layout de tienda si es necesario */}
-                {/* <Route path="/search" element={<SearchLayout />} /> Ruta separada */}
-
-                {/* Ruta para la página de no autorizado */}
                 <Route path="/unauth-page" element={<UnauthPage />} />
 
                 {/* Ruta comodín para cualquier otra cosa - ¡IMPORTANTE: esta debe ir al final! */}
-                {/* Si no se encuentra ninguna otra ruta, se muestra NotFound */}
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </div>
