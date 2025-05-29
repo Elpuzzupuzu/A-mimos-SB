@@ -24,11 +24,12 @@ const PORT = process.env.PORT || 5000;
 // 🔹 Middlewares
 
 
+// 🔹 Middlewares
 app.use(cors({
-    origin: '*',
+    origin: process.env.CORS_ORIGIN, // <-- ¡Usa una variable de entorno para el origen!
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    // credentials: true, // ¡Quita esta línea para la prueba con '*'!
+    credentials: true, // <-- ¡Descomenta y activa esto!
 }));
 
 
