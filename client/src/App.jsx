@@ -16,7 +16,7 @@ import ShoppingHome from './pages/shopping-view/home';
 import ShoppingListing from './pages/shopping-view/listing';
 import ShoppingCheckout from './pages/shopping-view/checkout';
 import ShoppingAccount from './pages/shopping-view/account';
-import CheckAuth from './components/common/check-auth'; // Mantenemos la importación pero no la usaremos en /auth
+import CheckAuth from './components/common/check-auth'; // Mantenemos la importación
 import UnauthPage from './pages/unauth-page';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
@@ -43,8 +43,12 @@ function App() {
     return (
         <div className="flex flex-col overflow-hidden bg-white">
             <Routes>
-                {/* Rutas de autenticación - SIN CheckAuth para esta prueba */}
-                <Route path="/auth" element={<AuthLayout />}>
+                {/* Rutas de autenticación - ¡VUELVE A HABILITAR CheckAuth AQUÍ! */}
+                <Route path="/auth" element={
+                    <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+                        <AuthLayout />
+                    </CheckAuth>
+                }>
                     <Route path="login" element={<AuthLogin />} />
                     <Route path="register" element={<AutRegister />} />
                     <Route path="recover-password" element={<RecoverPassword />} />
