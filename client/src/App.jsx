@@ -80,7 +80,7 @@ function App() {
                 </Route>
 
                 {/* Ruta para la página de búsqueda - independiente del layout de tienda */}
-                <Route path="/search" element={<SearchLayout />} /> Ruta separada
+                {/* <Route path="/search" element={<SearchLayout />} /> Ruta separada */}
 
                 {/* Ruta para la página de no encontrado */}
                 <Route path="*" element={<NotFound />} />
