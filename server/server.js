@@ -22,15 +22,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // 🔹 Middlewares
-app.use(
-  cors({
-    // origin: ["https://a-mimos-sb.onrender.com", "http://localhost:5173"],
-    origin: '*', // <--- CAMBIA A ESTO TEMPORALMENTE
+
+
+app.use(cors({
+    origin: '*',
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+    // credentials: true, // ¡Quita esta línea para la prueba con '*'!
+}));
+
+
 app.use(express.json());
 app.use(cookieParser());
 
