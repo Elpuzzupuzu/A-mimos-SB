@@ -10,5 +10,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: './', // 🔥 Esto soluciona el problema de las rutas absolutas
-});
+  base: '/', // <--- ¡CAMBIA ESTO!
+})
